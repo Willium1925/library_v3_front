@@ -5,7 +5,7 @@ export const loansAPI = {
    * 獲取當前借閱
    */
   getCurrentLoans() {
-    return apiClient.get('/loans/current')
+    return apiClient.get('/loans/my-current')
   },
 
   /**

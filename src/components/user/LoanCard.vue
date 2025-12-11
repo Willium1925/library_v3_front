@@ -2,21 +2,21 @@
   <div class="loan-card">
     <div class="book-thumb">
       <img
-        :src="loan.coverImage || 'https://placehold.co/100x150/eee/333?text=Book'"
-        :alt="loan.bookTitle"
+        :src="loan.imageUrl || 'https://placehold.co/100x150/eee/333?text=Book'"
+        :alt="loan.title"
       />
     </div>
     <div class="loan-info">
-      <h4 class="book-title">{{ loan.bookTitle }}</h4>
+      <h4 class="book-title">{{ loan.title }}</h4>
       <p class="book-meta">作者：{{ loan.author }}</p>
-      <p class="book-meta">館藏編號：{{ loan.copyUniqueCode }}</p>
+      <p class="book-meta">書籍碼：{{ loan.uniqueCode }}</p>
       <div class="date-info">
-        <span class="date-label">借閱日：</span>
-        <span class="date-value">{{ formatDate(loan.loanDate) }}</span>
-        <span class="date-label" style="margin-left: 20px">到期日：</span>
-        <span class="date-value" :class="{ overdue: isOverdue(loan.dueDate) }">
-          {{ formatDate(loan.dueDate) }}
-        </span>
+        <span class="date-label">借閱日：{{ formatDate(loan.loanDate) }}</span>
+        <span class="date-label">到期日：{{ formatDate(loan.dueDate) }}</span>
+      </div>
+      <div class="date-info">
+        <div class="date-label">借閱日期：2025-12-01</div>
+        <div class="card-meta" style="color:var(--primary); font-weight:700;">到期日期：2025-12-31</div>
       </div>
       <div v-if="loan.renewalCount !== undefined" class="renewal-info">
         <span>已續借：{{ loan.renewalCount }} / 2 次</span>
@@ -130,10 +130,11 @@ const handleRenew = () => {
 }
 
 .date-info {
+  font-size: 16px;
+  flex: 1;
   display: flex;
-  align-items: center;
-  font-size: 13px;
-  margin-top: 10px;
+  flex-direction:column;
+  justify-content: center;
 }
 
 .date-label {
