@@ -1,0 +1,39 @@
+/* 全域 CSS 變數 - 從 HTML 樣板提取 */
+:root {
+    --primary: #1a1a1a;
+    --accent: #d32f2f; /* 警告/強調色 */
+    --success: #2e7d32; /* 成功/可取書 */
+    --series: #bb5bec; /* 系列作標籤色 */
+    --bg: #f9f9f9;
+    --border-color: #000;
+    --gray: #888;
+    --light-gray: #e5e5e5;
+    --light-border: #ddd;
+}
+
+/* 全域重置 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--primary);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: 0.2s;
+}
+
+ul {
+    list-style: none;
+}
+
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@700&display=swap');
+

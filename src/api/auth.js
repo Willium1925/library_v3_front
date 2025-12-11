@@ -1,0 +1,36 @@
+import apiClient from './index'
+
+export const authAPI = {
+  /**
+   * 使用者登入
+   * @param {Object} credentials
+   * @param {string} credentials.account - 帳號
+   * @param {string} credentials.password - 密碼
+   */
+  login(credentials) {
+    return apiClient.post('/auth/login', credentials)
+  },
+
+  /**
+   * 使用者登出
+   */
+  logout() {
+    return apiClient.post('/auth/logout')
+  },
+
+  /**
+   * 註冊新帳號
+   * @param {Object} data - 註冊資料
+   */
+  register(data) {
+    return apiClient.post('/auth/register', data)
+  },
+
+  /**
+   * 獲取當前使用者資料
+   */
+  getCurrentUser() {
+    return apiClient.get('/users/current')
+  }
+}
+
