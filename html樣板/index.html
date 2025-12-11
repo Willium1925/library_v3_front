@@ -8,49 +8,28 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* --- 全域變數 --- */
         :root {
-            --primary: #1a1a1a; /* 近乎黑色的深灰 */
-            --accent: #d32f2f;  /* 借用 Accorder/New Topics 的紅色點綴 */
+            --primary: #1a1a1a;
+            --accent: #d32f2f; /* 警告/強調色 */
+            --success: #2e7d32; /* 成功/可取書 */
             --bg: #f9f9f9;
-            --border-color: #000; /* 強烈的黑色邊框風格 */
+            --border-color: #000;
             --gray: #888;
+            --light-border: #ddd;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--primary); }
-        a { text-decoration: none; color: inherit; }
+        a { text-decoration: none; color: inherit; transition: 0.2s; }
         ul { list-style: none; }
 
-        /* --- Global Header --- */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
-            height: 80px;
-            background: #fff;
-            border-bottom: 2px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        /* --- Header (維持一致) --- */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 0 40px; height: 80px; background: #fff; border-bottom: 2px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
         .header__logo { font-family: 'Noto Serif TC', serif; font-size: 24px; font-weight: 700; letter-spacing: 2px; }
-
-        .header__search {
-            flex: 1;
-            max-width: 500px;
-            margin: 0 20px;
-            position: relative;
-        }
-        .header__search input {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid var(--primary);
-            border-radius: 50px; /* 圓角風格 */
-            background: #f0f0f0;
-        }
-
-        .header__actions { display: flex; align-items: center; gap: 20px; }
+        .header__search { flex: 1; max-width: 500px; margin: 0 20px; }
+        .header__search input { width: 100%; padding: 10px 15px; border: 1px solid var(--primary); border-radius: 50px; background: #f0f0f0; }
+        .header__actions { display: flex; align-items: center; gap: 20px; font-weight: 500; }
         .user-profile { font-weight: 500; cursor: pointer; transition: 0.3s; }
         .user-profile:hover { opacity: 0.7; }
 
@@ -171,15 +150,6 @@
         .book-card__img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
         .book-card__info { padding: 15px; }
-        .book-card__badge {
-            display: inline-block;
-            font-size: 10px;
-            padding: 2px 6px;
-            background: var(--primary);
-            color: #fff;
-            border-radius: 4px;
-            margin-bottom: 5px;
-        }
         .book-card__title { font-size: 16px; font-weight: 700; margin-bottom: 5px; line-height: 1.4; height: 44px; overflow: hidden; }
         .book-card__meta { font-size: 12px; color: var(--gray); margin-bottom: 2px; }
 
@@ -252,7 +222,6 @@
                 <img src="https://placehold.co/300x400/eee/333?text=Book+Cover" alt="Book">
             </div>
             <div class="book-card__info">
-                <span class="book-card__badge">NEW</span>
                 <h3 class="book-card__title">挪威的森林 (30週年紀念版)</h3>
                 <p class="book-card__meta">作者：村上春樹</p>
                 <p class="book-card__meta">出版：時報出版</p>

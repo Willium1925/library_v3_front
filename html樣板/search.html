@@ -8,29 +8,43 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* =========================================
-           1. 全域設定 & 變數 (維持原樣)
-           ========================================= */
+        /* --- 全域變數 --- */
         :root {
             --primary: #1a1a1a;
-            --accent: #d32f2f;
+            --accent: #d32f2f; /* 警告/強調色 */
+            --success: #2e7d32; /* 成功/可取書 */
+            --series: #bb5bec; /* 系列作標籤色 */
             --bg: #f9f9f9;
             --border-color: #000;
             --gray: #888;
+            --light-border: #ddd;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--primary); }
-        a { text-decoration: none; color: inherit; }
+        a { text-decoration: none; color: inherit; transition: 0.2s; }
         ul { list-style: none; }
 
-        /* Header (維持原樣) */
+        /* --- Header (維持一致) --- */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 0 40px; height: 80px; background: #fff; border-bottom: 2px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
         .header__logo { font-family: 'Noto Serif TC', serif; font-size: 24px; font-weight: 700; letter-spacing: 2px; }
         .header__search { flex: 1; max-width: 500px; margin: 0 20px; }
         .header__search input { width: 100%; padding: 10px 15px; border: 1px solid var(--primary); border-radius: 50px; background: #f0f0f0; }
-        .header__actions { display: flex; align-items: center; gap: 20px; }
-        .user-profile { font-weight: 500; cursor: pointer; }
+        .header__actions { display: flex; align-items: center; gap: 20px; font-weight: 500; }
+        .user-profile { font-weight: 500; cursor: pointer; transition: 0.3s; }
+        .user-profile:hover { opacity: 0.7; }
+
+        .notificationbox { position: relative; cursor: pointer; font-size: 20px; }
+        .notificationbox .dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
 
         /* Layout */
         .layout-container {
@@ -173,7 +187,7 @@
         .status-badge.borrowable { color: green; border-color: green; }
         .status-badge.loaned { color: red; border-color: red; }
         .result-card__content { padding: 15px; display: flex; flex-direction: column; flex: 1; }
-        .result-card__series { font-size: 12px; color: var(--accent); margin-bottom: 5px; font-weight: 600; }
+        .result-card__series { font-size: 12px; color: var(--series); margin-bottom: 5px; font-weight: 600; }
         .result-card__title { font-size: 15px; font-weight: 700; margin-bottom: auto; line-height: 1.4; }
         .result-card__info { margin-top: 10px; font-size: 12px; color: #555; }
         .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 40px; }
@@ -187,10 +201,16 @@
 <header class="header">
     <a href="index.html" class="header__logo">LIBRARY.SYS</a>
     <div class="header__search">
-        <input type="text" value="日本文學" placeholder="搜尋...">
+        <input type="text" placeholder="搜尋書名、作者、ISBN...">
     </div>
     <div class="header__actions">
-        <div class="user-profile"><i class="fa-regular fa-user"></i> 您好，陳小明</div>
+        <div class="user-profile">
+            <i class="fa-regular fa-user"></i> 您好，陳小明
+        </div>
+        <div class="notificationbox">
+            <i class="fa-regular fa-bell"></i>
+            <span class="dot"></span>
+        </div>
     </div>
 </header>
 
@@ -311,8 +331,8 @@
                     <div class="status-badge borrowable">可借閱</div>
                 </div>
                 <div class="result-card__content">
-                    <div class="result-card__series">系列：挪威的森林 [1]</div>
                     <h3 class="result-card__title">挪威的森林 (上)</h3>
+                    <div class="result-card__series">系列：挪威的森林</div>
                     <div class="result-card__info">
                         <div>作者：村上春樹</div>
                         <div>出版：時報出版</div>
@@ -326,8 +346,8 @@
                     <div class="status-badge loaned">借出中</div>
                 </div>
                 <div class="result-card__content">
-                    <div class="result-card__series">系列：挪威的森林 [2]</div>
                     <h3 class="result-card__title">挪威的森林 (下)</h3>
+                    <div class="result-card__series">系列：挪威的森林</div>
                     <div class="result-card__info">
                         <div>作者：村上春樹</div>
                         <div>出版：時報出版</div>

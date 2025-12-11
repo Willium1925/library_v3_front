@@ -21,7 +21,7 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--primary); padding-bottom: 80px; }
-        a { text-decoration: none; color: inherit; }
+        a { text-decoration: none; color: inherit; transition: 0.2s; }
         ul { list-style: none; }
 
         /* --- Header (維持一致) --- */
@@ -30,6 +30,19 @@
         .header__search { flex: 1; max-width: 500px; margin: 0 20px; }
         .header__search input { width: 100%; padding: 10px 15px; border: 1px solid var(--primary); border-radius: 50px; background: #f0f0f0; }
         .header__actions { display: flex; align-items: center; gap: 20px; font-weight: 500; }
+        .user-profile { font-weight: 500; cursor: pointer; transition: 0.3s; }
+        .user-profile:hover { opacity: 0.7; }
+
+        .notificationbox { position: relative; cursor: pointer; font-size: 20px; }
+        .notificationbox .dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
 
         /* --- Layout: Sidebar + Main Content --- */
         .dashboard-container {
@@ -184,11 +197,16 @@
 <header class="header">
     <a href="index.html" class="header__logo">LIBRARY.SYS</a>
     <div class="header__search">
-        <input type="text" placeholder="搜尋...">
+        <input type="text" placeholder="搜尋書名、作者、ISBN...">
     </div>
     <div class="header__actions">
-        <div><i class="fa-regular fa-bell"></i></div>
-        <div><i class="fa-regular fa-user"></i> 您好，陳小明</div>
+        <div class="user-profile">
+            <i class="fa-regular fa-user"></i> 您好，陳小明
+        </div>
+        <div class="notificationbox">
+            <i class="fa-regular fa-bell"></i>
+            <span class="dot"></span>
+        </div>
     </div>
 </header>
 
