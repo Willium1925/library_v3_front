@@ -97,12 +97,12 @@ const router = useRouter()
 
 // 從後端獲取的分類資料
 const mainCategories = ref([])
-const allSubCategories = ref([])
 const selectedMainCategory = ref(null)
 
 const currentSubCategories = computed(() => {
   if (!selectedMainCategory.value) return []
-  return allSubCategories.value.filter(sub => sub.categoryMainId === selectedMainCategory.value)
+  const selectedCategory = mainCategories.value.find(cat => cat.id === selectedMainCategory.value)
+  return selectedCategory?.categorySubs || []
 })
 
 const latestBooks = ref([])
@@ -170,12 +170,8 @@ const fetchPopularTags = async (categoryId = null) => {
 
 const fetchCategories = async () => {
   try {
-    const [mainCats, subCats] = await Promise.all([
-      categoriesAPI.getAll(),
-      categoriesAPI.getAllSubs()
-    ])
-    mainCategories.value = mainCats
-    allSubCategories.value = Array.from(subCats) // Convert Set to Array
+    const categories = await categoriesAPI.getAll()
+    mainCategories.value = categories
     
     // 預設選擇第一個主分類
     if (mainCategories.value.length > 0) {
@@ -186,9 +182,9 @@ const fetchCategories = async () => {
   }
 }
 
-// 監聽主分類變化，更新書籍列表
-watch(selectedMainCategory, (newCategoryId) => {
-  if (newCategoryId) {
+// 監聽主分類變化，更新書籍列表（跳過初始值，避免重複呼叫）
+watch(selectedMainCategory, (newCategoryId, oldCategoryId) => {
+  if (newCategoryId && oldCategoryId !== undefined) {
     fetchLatestBooks(newCategoryId)
     fetchPopularBooks(newCategoryId)
     fetchPopularTags(newCategoryId)
@@ -197,6 +193,12 @@ watch(selectedMainCategory, (newCategoryId) => {
 
 onMounted(async () => {
   await fetchCategories()
+  // 初始載入時，手動觸發一次資料獲取
+  if (selectedMainCategory.value) {
+    await fetchLatestBooks(selectedMainCategory.value)
+    await fetchPopularBooks(selectedMainCategory.value)
+    await fetchPopularTags(selectedMainCategory.value)
+  }
 })
 </script>
 

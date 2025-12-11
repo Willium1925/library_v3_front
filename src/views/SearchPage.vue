@@ -264,13 +264,11 @@ const updateFilterOptionsFromStats = (stats) => {
 
 const fetchFilterOptions = async () => {
   try {
-    const [mainCats, subCats] = await Promise.all([
-      categoriesAPI.getAll(),
-      categoriesAPI.getAllSubs()
-    ])
+    const categories = await categoriesAPI.getAll()
     
-    filterOptions.mainCategories = mainCats
-    filterOptions.subCategories = Array.from(subCats)
+    filterOptions.mainCategories = categories
+    // 從所有主分類中提取所有子分類
+    filterOptions.subCategories = categories.flatMap(cat => cat.categorySubs || [])
     
     // TODO: 獲取作者、出版社、標籤列表
     // 暫時使用空陣列，待後端 API 實作

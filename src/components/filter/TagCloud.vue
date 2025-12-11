@@ -6,7 +6,7 @@
       class="tag-pill"
       @click="handleTagClick(tag)"
     >
-      {{ tag.name }}
+      {{ tag.title }}
     </div>
   </div>
 </template>
