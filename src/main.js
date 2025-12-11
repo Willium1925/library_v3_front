@@ -12,6 +12,7 @@ app.use(router)
 
 // 初始化 auth store（在掛載前檢查 token）
 import { useAuthStore } from './stores/auth'
+import '@fortawesome/fontawesome-free/css/all.css'
 const authStore = useAuthStore()
 authStore.initialize()
 

@@ -17,9 +17,13 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(credentials) {
     try {
       const response = await authAPI.login(credentials)
-      token.value = response.token
-      user.value = response.user
-      localStorage.setItem('token', response.token)
+      // LoginResponse 只返回 jwtToken
+      token.value = response.jwtToken
+      localStorage.setItem('token', response.jwtToken)
+      
+      // 登入成功後立即獲取使用者資料
+      await fetchUserProfile()
+      
       return true
     } catch (error) {
       console.error('登入失敗:', error)

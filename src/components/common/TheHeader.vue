@@ -59,8 +59,7 @@ const handleSearch = () => {
 }
 
 const handleLogin = () => {
-  // TODO: 實作登入邏輯或導向登入頁
-  console.log('前往登入頁')
+  router.push('/login')
 }
 
 const handleLogout = async () => {

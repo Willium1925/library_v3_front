@@ -20,6 +20,18 @@ const routes = [
     meta: { title: '書籍詳情 - Library System' }
   },
   {
+    path: '/login',
+    name: 'Login',
+    component: () => import('../views/LoginPage.vue'),
+    meta: { title: '會員登入 - Library System' }
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: () => import('../views/RegisterPage.vue'),
+    meta: { title: '會員註冊 - Library System' }
+  },
+  {
     path: '/my',
     name: 'MyPage',
     component: () => import('../views/MyPage.vue'),
@@ -41,10 +53,12 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth) {
     const token = localStorage.getItem('token')
     if (!token) {
-      // 未登入，導向首頁或登入頁
-      console.warn('需要登入才能訪問此頁面')
-      // next('/')
-      // 暫時允許訪問，待登入功能完成後啟用
+      // 未登入，導向登入頁
+      next({
+        path: '/login',
+        query: { redirect: to.fullPath }
+      })
+      return
     }
   }
 

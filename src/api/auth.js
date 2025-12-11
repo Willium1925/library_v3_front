@@ -23,14 +23,14 @@ export const authAPI = {
    * @param {Object} data - 註冊資料
    */
   register(data) {
-    return apiClient.post('/auth/register', data)
+    return apiClient.post('/users/register', data)
   },
 
   /**
    * 獲取當前使用者資料
    */
   getCurrentUser() {
-    return apiClient.get('/users/current')
+    return apiClient.get('/users/me/profile')
   }
 }
 

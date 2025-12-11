@@ -80,9 +80,16 @@ const formData = reactive({
 
 const fetchReviews = async () => {
   try {
-    reviews.value = await reviewsAPI.getByBookId(props.bookId)
+    const res = await reviewsAPI.getByBookId(props.bookId)
+    // 支援 axios 回傳的 res.data 或直接回傳陣列/物件
+    const data = res?.data ?? res
+    // 如果是分頁物件，取 content；否則嘗試直接使用陣列
+    reviews.value = Array.isArray(data)
+        ? data
+        : (data.content ?? [])
   } catch (error) {
     console.error('獲取評論失敗:', error)
+    reviews.value = []
   }
 }
 

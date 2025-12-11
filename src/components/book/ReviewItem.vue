@@ -2,9 +2,6 @@
   <div class="review-item">
     <div class="review-header">
       <div class="reviewer-info">
-        <div class="avatar">
-          <i class="fa-solid fa-user"></i>
-        </div>
         <div class="reviewer-details">
           <span class="reviewer-name">{{ review.userName }}</span>
           <div class="review-meta">
@@ -40,8 +37,10 @@
         class="like-btn"
         :class="{ liked: review.userLiked }"
         @click="handleLike"
+        style="margin-left: auto;"
+        aria-label="like button"
       >
-        <i :class="review.userLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+        <i :class="review.userLiked ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
         {{ review.likesCount }}
       </button>
     </div>
