@@ -5,34 +5,31 @@
     <table class="holdings-table">
       <thead>
         <tr>
-          <th>館藏編號</th>
+          <th>書籍編號</th>
+          <th>館藏地</th>
           <th>狀態</th>
-          <th>到期日</th>
           <th>操作</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="copy in copies" :key="copy.id">
+          <!-- 書籍編號 -->
           <td class="copy-code">{{ copy.uniqueCode }}</td>
+          <!-- 館藏地 -->
           <td>
-            <span
-              class="status"
-              :class="{
-                available: copy.status === 'A',
-                loaned: copy.status === 'L',
-                reserved: copy.status === 'R'
-              }"
-            >
-              <i class="fa-solid fa-circle"></i>
-              {{ getStatusText(copy.status) }}
-            </span>
-          </td>
-          <td>
-            <span v-if="copy.dueDate" class="due-date">
-              {{ formatDate(copy.dueDate) }}
+            <span v-if="copy.location" class="location">
+              {{ copy.location }}
             </span>
             <span v-else class="no-date">—</span>
           </td>
+          <!-- 狀態 -->
+          <td>
+            <span v-if="copy.statusDescription" class="status">
+              <i class="fa-solid fa-circle"></i>
+              {{ copy.statusDescription }}
+            </span>
+          </td>
+          <!-- 操作 -->
           <td>
             <button
               v-if="copy.status === 'L'"
@@ -43,17 +40,6 @@
               <i class="fa-solid fa-bookmark"></i>
               預約 {{ copy.queueCount > 0 ? `(排隊 ${copy.queueCount})` : '' }}
             </button>
-            <button
-              v-else-if="copy.status === 'A'"
-              class="action-btn btn-available"
-              disabled
-            >
-              <i class="fa-solid fa-check"></i>
-              可館內借閱
-            </button>
-            <span v-else class="reserved-info">
-              已有 {{ copy.queueCount }} 人預約
-            </span>
           </td>
         </tr>
       </tbody>
@@ -83,15 +69,6 @@ const emit = defineEmits(['reserve-success'])
 const authStore = useAuthStore()
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 
-const getStatusText = (status) => {
-  const statusMap = {
-    'A': '可借閱',
-    'L': '已借出',
-    'R': '預約中',
-    'M': '維修中'
-  }
-  return statusMap[status] || '未知'
-}
 
 const formatDate = (dateString) => {
   const date = new Date(dateString)
@@ -199,9 +176,9 @@ const handleReserve = async (copyId) => {
   font-size: 10px;
 }
 
-.due-date {
+.location {
   font-weight: 400;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--gray);
 }
 
@@ -244,11 +221,6 @@ const handleReserve = async (copyId) => {
   color: #fff;
   cursor: default;
   opacity: 0.7;
-}
-
-.reserved-info {
-  font-size: 13px;
-  color: var(--gray);
 }
 
 .no-copies {

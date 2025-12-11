@@ -16,7 +16,7 @@
         <!-- Left: Book Cover -->
         <div class="book-cover">
           <img
-            :src="book.coverImage || 'https://placehold.co/350x500/eee/333?text=No+Cover'"
+            :src="book.imageUrl || 'https://placehold.co/350x500/eee/333?text=No+Cover'"
             :alt="book.title"
           />
         </div>
@@ -26,19 +26,19 @@
           <div class="book-header-row">
             <div class="book-title-group">
               <h1 class="book-title">{{ book.title }}</h1>
-              <p class="book-author">作者：{{ book.author }}</p>
+              <p class="book-author">作者：{{ Array.isArray(book.authors) ? book.authors.join('、') : (book.author || book.authors || '未知') }}</p>
             </div>
             <div class="rating-box">
-              <span class="rating-score">{{ book.averageRating || 'N/A' }}</span>
+              <span :class="['rating-score', { 'large-yellow': book.averageRating !== undefined && book.averageRating !== null }]">
+                    {{ book.averageRating !== undefined && book.averageRating !== null ? book.averageRating : '尚無' }}
+              </span>
               <div class="rating-stars">
-                <i
-                  v-for="star in 5"
+                <i v-for="star in 5"
                   :key="star"
                   class="fa-solid fa-star"
                   :class="{ active: star <= Math.round(book.averageRating) }"
                 ></i>
               </div>
-              <span class="rating-count">({{ book.ratingCount || 0 }})</span>
             </div>
           </div>
           
@@ -53,8 +53,8 @@
               <span class="meta-value">{{ book.publisher }}</span>
             </div>
             <div class="meta-item">
-              <span class="meta-label">出版日期:</span>
-              <span class="meta-value">{{ formatDate(book.publishDate) }}</span>
+              <span class="meta-label">出版年份:</span>
+              <span class="meta-value">{{ book.publishYear }}</span>
             </div>
             <div class="meta-item">
               <span class="meta-label">上架日期:</span>
@@ -62,18 +62,17 @@
             </div>
             <div class="meta-item">
               <span class="meta-label">分類:</span>
-              <span class="meta-value">{{ book.categoryName }}</span>
-            </div>
-            <div class="meta-item">
-              <span class="meta-label">借閱次數:</span>
-              <span class="meta-value">{{ book.totalLoanCount || 0 }} 次</span>
+              <span class="meta-value">{{ book.mainCategoryTitle }} > {{ book.subCategoryTitle }}</span>
             </div>
           </div>
           
           <!-- Tags -->
           <div v-if="book.tags && book.tags.length > 0" class="tags-row">
-            <div v-for="tag in book.tags" :key="tag.id" class="tag">
-              {{ tag.name }}
+            <div v-for="tag in book.tags"
+                :key="tag.id || tag"
+                class="tag"
+            >
+              {{ tag.title || tag }}
             </div>
           </div>
           
@@ -130,8 +129,8 @@ const fetchBookDetail = async () => {
   try {
     loading.value = true
     const response = await booksStore.fetchBookById(bookId)
-    book.value = response.book
-    bookCopies.value = response.copies || []
+    book.value = response
+    bookCopies.value = response.bookCopies || []
   } catch (error) {
     console.error('獲取書籍詳情失敗:', error)
     book.value = null
@@ -262,7 +261,7 @@ onMounted(() => {
 
 /* Rating Box */
 .rating-box {
-  background: var(--primary);
+  background: var(--gray);
   color: #fff;
   padding: 15px 20px;
   text-align: center;
@@ -281,9 +280,14 @@ onMounted(() => {
   color: #ffd700;
   margin-top: 5px;
 }
+.rating-score.large-yellow {
+  color: #ffd700;
+  font-size: 45px;
+  font-weight: 800;
+}
 
 .rating-stars i {
-  color: #666;
+  color: #cacaca;
 }
 
 .rating-stars i.active {
@@ -407,4 +411,3 @@ onMounted(() => {
   }
 }
 </style>
-
