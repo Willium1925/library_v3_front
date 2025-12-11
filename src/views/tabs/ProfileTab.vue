@@ -64,7 +64,7 @@ const getRoleText = (role) => {
 
 const getStatusText = (status) => {
   const statusMap = {
-    'PENDING': '待啟用',
+    'PENDING': '尚未啟用，請攜帶相關證件至本館開通',
     'ACTIVE': '正常',
     'SUSPENDED': '停權中'
   }
