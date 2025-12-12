@@ -247,20 +247,23 @@ const goToPage = (page) => {
 }
 
 const updateURL = () => {
-  const query = {
-    ...filters,
-    page: pagination.currentPage,
-    size: pagination.pageSize,
-    sort: sortOption.value
-  }
+  const query = {}
   
-  // 移除空值
-  Object.keys(query).forEach(key => {
-    if (query[key] === null || query[key] === '' || 
-        (Array.isArray(query[key]) && query[key].length === 0)) {
-      delete query[key]
-    }
-  })
+  // 只加入有值的篩選條件
+  if (filters.keyword) query.keyword = filters.keyword
+  if (filters.mainCategoryId) query.mainCategoryId = filters.mainCategoryId
+  if (filters.subCategoryId) query.subCategoryId = filters.subCategoryId
+  if (filters.authorId) query.authorId = filters.authorId
+  if (filters.publisherId) query.publisherId = filters.publisherId
+  if (filters.seriesDisplay) query.seriesDisplay = filters.seriesDisplay
+  if (filters.tags && filters.tags.length > 0) query.tags = filters.tags
+  
+  // 分頁參數
+  if (pagination.currentPage > 0) query.page = pagination.currentPage
+  if (pagination.pageSize !== 20) query.size = pagination.pageSize
+  
+  // 排序參數（總是包含）
+  query.sort = sortOption.value
   
   router.push({ query })
 }

@@ -35,12 +35,22 @@ export const useBooksStore = defineStore('books', () => {
     try {
       loading.value = true
       
+      // 如果 params 中有 sort 參數，使用它；否則使用 store 的 sortBy 和 sortDirection
+      let sortParam = `${sortBy.value},${sortDirection.value}`
+      if (params.sort) {
+        sortParam = params.sort
+        // 同步更新 store 的 sortBy 和 sortDirection
+        const [field, direction] = params.sort.split(',')
+        sortBy.value = field
+        sortDirection.value = direction || 'desc'
+      }
+      
       const searchParams = {
         ...filters.value,
         ...params,
         page: params.page || 0,
         size: params.size || 20,
-        sort: `${sortBy.value},${sortDirection.value}`
+        sort: sortParam
       }
       
       const response = await booksAPI.search(searchParams)
