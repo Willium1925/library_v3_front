@@ -1,6 +1,6 @@
 import apiClient from './index'
 
-export const tagsAPI = {
+const tagsAPI = {
   /**
    * 獲取熱門標籤 Top 10
    * @param {number} categoryId - 分類ID（可選）
@@ -17,4 +17,7 @@ export const tagsAPI = {
     return apiClient.get('/tags')
   }
 }
+
+export default tagsAPI
+export { tagsAPI }
 

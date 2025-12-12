@@ -5,11 +5,11 @@
     <div class="layout-container">
       <!-- Sidebar -->
       <FilterSidebar
-        :mainCategories="filterOptions.mainCategories"
-        :subCategories="filterOptions.subCategories"
-        :authors="filterOptions.authors"
-        :publishers="filterOptions.publishers"
-        :tags="filterOptions.tags"
+        :mainCategories="formattedMainCategories"
+        :subCategories="formattedSubCategories"
+        :authors="formattedAuthors"
+        :publishers="formattedPublishers"
+        :tags="formattedTags"
         :initialFilters="filters"
         @filter-change="handleFilterChange"
       />
@@ -110,7 +110,10 @@
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useBooksStore } from '../stores/books'
-import { categoriesAPI } from '../api/categories'
+import categoriesAPI from '../api/categories'
+import authorsAPI from '../api/authors'
+import publishersAPI from '../api/publishers'
+import tagsAPI from '../api/tags'
 import TheHeader from '../components/common/TheHeader.vue'
 import FilterSidebar from '../components/filter/FilterSidebar.vue'
 import BookGrid from '../components/book/BookGrid.vue'
@@ -140,13 +143,63 @@ const filters = reactive({
 
 const sortOption = ref('addedDate,desc')
 
-// 從後端獲取的篩選選項
+// 從後端獲取的篩選選項（原始資料）
 const filterOptions = reactive({
   mainCategories: [],
-  subCategories: [],
+  allSubCategories: [], // 所有子分類
   authors: [],
   publishers: [],
   tags: []
+})
+
+// 格式化主分類（轉換為 FilterGroup 需要的格式）
+const formattedMainCategories = computed(() => {
+  return filterOptions.mainCategories.map(cat => ({
+    id: cat.id,
+    name: cat.categoryTitle
+  }))
+})
+
+// 格式化子分類（根據選中的主分類過濾）
+const formattedSubCategories = computed(() => {
+  let subCats = filterOptions.allSubCategories
+  
+  // 如果選擇了主分類，只顯示該主分類下的子分類
+  if (filters.mainCategoryId) {
+    const selectedMainCat = filterOptions.mainCategories.find(
+      cat => cat.id === filters.mainCategoryId
+    )
+    subCats = selectedMainCat?.categorySubs || []
+  }
+  
+  return subCats.map(sub => ({
+    id: sub.id,
+    name: sub.categorySubTitle
+  }))
+})
+
+// 格式化作者
+const formattedAuthors = computed(() => {
+  return filterOptions.authors.map(author => ({
+    id: author.id,
+    name: author.name
+  }))
+})
+
+// 格式化出版商
+const formattedPublishers = computed(() => {
+  return filterOptions.publishers.map(pub => ({
+    id: pub.id,
+    name: pub.pubName
+  }))
+})
+
+// 格式化標籤
+const formattedTags = computed(() => {
+  return filterOptions.tags.map(tag => ({
+    id: tag.id,
+    name: tag.title
+  }))
 })
 
 // 計算可見的頁碼範圍
@@ -264,17 +317,37 @@ const updateFilterOptionsFromStats = (stats) => {
 
 const fetchFilterOptions = async () => {
   try {
+    // 獲取分類
     const categories = await categoriesAPI.getAll()
-    
     filterOptions.mainCategories = categories
-    // 從所有主分類中提取所有子分類
-    filterOptions.subCategories = categories.flatMap(cat => cat.categorySubs || [])
+    filterOptions.allSubCategories = categories.flatMap(cat => cat.categorySubs || [])
     
-    // TODO: 獲取作者、出版社、標籤列表
-    // 暫時使用空陣列，待後端 API 實作
-    filterOptions.authors = []
-    filterOptions.publishers = []
-    filterOptions.tags = []
+    // 獲取作者
+    try {
+      const authors = await authorsAPI.getAll()
+      filterOptions.authors = Array.from(authors) // Set 轉 Array
+    } catch (error) {
+      console.error('獲取作者列表失敗:', error)
+      filterOptions.authors = []
+    }
+    
+    // 獲取出版商
+    try {
+      const publishers = await publishersAPI.getAll()
+      filterOptions.publishers = Array.from(publishers) // Set 轉 Array
+    } catch (error) {
+      console.error('獲取出版商列表失敗:', error)
+      filterOptions.publishers = []
+    }
+    
+    // 獲取標籤
+    try {
+      const tags = await tagsAPI.getAll()
+      filterOptions.tags = Array.from(tags) // Set 轉 Array
+    } catch (error) {
+      console.error('獲取標籤列表失敗:', error)
+      filterOptions.tags = []
+    }
   } catch (error) {
     console.error('獲取篩選選項失敗:', error)
   }

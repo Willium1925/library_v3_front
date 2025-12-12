@@ -1,6 +1,6 @@
 import apiClient from './index'
 
-export const categoriesAPI = {
+const categoriesAPI = {
   /**
    * 獲取所有主分類
    */
@@ -15,4 +15,7 @@ export const categoriesAPI = {
     return apiClient.get('/categorySubs')
   }
 }
+
+export default categoriesAPI
+export { categoriesAPI }
 

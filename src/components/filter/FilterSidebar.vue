@@ -120,8 +120,9 @@ const clearAllFilters = () => {
 
 // 當主分類改變時，清除子分類選擇
 watch(() => filters.mainCategoryId, (newVal, oldVal) => {
-  if (newVal !== oldVal) {
+  if (newVal !== oldVal && oldVal !== undefined) {
     filters.subCategoryId = null
+    handleFilterChange()
   }
 })
 </script>
