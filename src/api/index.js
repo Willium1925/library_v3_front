@@ -51,10 +51,10 @@ apiClient.interceptors.response.use(
           console.error('伺服器錯誤')
           break
         default:
-          console.error('請求失敗:', data?.message || '未知錯誤')
+          console.error('請求失敗:', data?.message || '帳號或密碼錯誤')
       }
       
-      return Promise.reject(data?.message || '請求失敗')
+      return Promise.reject(data?.message || '帳號或密碼錯誤')
     } else if (error.request) {
       // 請求已發出但沒有收到響應
       console.error('網路錯誤，請檢查網路連線')
