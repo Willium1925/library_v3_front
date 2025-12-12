@@ -29,8 +29,6 @@
                 <option value="addedDate,asc">上架日期 (舊到新)</option>
                 <option value="totalLoanCount,desc">熱門借閱</option>
                 <option value="totalLoanCount,asc">冷門借閱</option>
-                <option value="title,asc">書名 (A-Z)</option>
-                <option value="title,desc">書名 (Z-A)</option>
               </select>
             </label>
             
@@ -156,7 +154,8 @@ const filterOptions = reactive({
 const formattedMainCategories = computed(() => {
   return filterOptions.mainCategories.map(cat => ({
     id: cat.id,
-    name: cat.categoryTitle
+    name: cat.categoryTitle,
+    count: cat.count
   }))
 })
 
@@ -174,7 +173,8 @@ const formattedSubCategories = computed(() => {
   
   return subCats.map(sub => ({
     id: sub.id,
-    name: sub.categorySubTitle
+    name: sub.categorySubTitle || sub.categorySubTitle,
+    count: sub.count
   }))
 })
 
@@ -182,7 +182,8 @@ const formattedSubCategories = computed(() => {
 const formattedAuthors = computed(() => {
   return filterOptions.authors.map(author => ({
     id: author.id,
-    name: author.name
+    name: author.name,
+    count: author.count
   }))
 })
 
@@ -190,7 +191,8 @@ const formattedAuthors = computed(() => {
 const formattedPublishers = computed(() => {
   return filterOptions.publishers.map(pub => ({
     id: pub.id,
-    name: pub.pubName
+    name: pub.name || pub.pubName,
+    count: pub.count
   }))
 })
 
@@ -198,7 +200,8 @@ const formattedPublishers = computed(() => {
 const formattedTags = computed(() => {
   return filterOptions.tags.map(tag => ({
     id: tag.id,
-    name: tag.title
+    name: tag.title,
+    count: tag.count
   }))
 })
 
@@ -311,43 +314,72 @@ const searchBooks = async () => {
 }
 
 const updateFilterOptionsFromStats = (stats) => {
-  // TODO: 根據 stats 更新篩選選項的 count
-  // 這個功能需要後端提供統計資料
+  if (!stats) return
+  
+  // 更新作者列表（只顯示當前搜尋結果中有的作者）
+  if (stats.authors && stats.authors.length > 0) {
+    filterOptions.authors = stats.authors.map(item => ({
+      id: item.id,
+      name: item.name,
+      count: item.count
+    }))
+  } else {
+    filterOptions.authors = []
+  }
+  
+  // 更新出版商列表
+  if (stats.publishers && stats.publishers.length > 0) {
+    filterOptions.publishers = stats.publishers.map(item => ({
+      id: item.id,
+      name: item.name,
+      count: item.count
+    }))
+  } else {
+    filterOptions.publishers = []
+  }
+  
+  // 更新標籤列表
+  if (stats.tags && stats.tags.length > 0) {
+    filterOptions.tags = stats.tags.map(item => ({
+      id: item.id,
+      title: item.name,
+      count: item.count
+    }))
+  } else {
+    filterOptions.tags = []
+  }
+  
+  // 更新主分類的 count（不改變列表，只更新數量）
+  if (stats.categories && stats.categories.length > 0) {
+    const categoryCountMap = new Map(stats.categories.map(c => [c.id, c.count]))
+    filterOptions.mainCategories = filterOptions.mainCategories.map(cat => ({
+      ...cat,
+      count: categoryCountMap.get(cat.id) || 0
+    }))
+  }
+  
+  // 更新子分類的 count
+  if (stats.subCategories && stats.subCategories.length > 0) {
+    const subCatCountMap = new Map(stats.subCategories.map(s => [s.id, s.count]))
+    filterOptions.allSubCategories = filterOptions.allSubCategories.map(sub => ({
+      ...sub,
+      count: subCatCountMap.get(sub.id) || 0
+    }))
+  }
 }
 
 const fetchFilterOptions = async () => {
   try {
-    // 獲取分類
+    // 獲取分類（這些是靜態的，不會根據搜尋結果改變）
     const categories = await categoriesAPI.getAll()
     filterOptions.mainCategories = categories
     filterOptions.allSubCategories = categories.flatMap(cat => cat.categorySubs || [])
     
-    // 獲取作者
-    try {
-      const authors = await authorsAPI.getAll()
-      filterOptions.authors = Array.from(authors) // Set 轉 Array
-    } catch (error) {
-      console.error('獲取作者列表失敗:', error)
-      filterOptions.authors = []
-    }
-    
-    // 獲取出版商
-    try {
-      const publishers = await publishersAPI.getAll()
-      filterOptions.publishers = Array.from(publishers) // Set 轉 Array
-    } catch (error) {
-      console.error('獲取出版商列表失敗:', error)
-      filterOptions.publishers = []
-    }
-    
-    // 獲取標籤
-    try {
-      const tags = await tagsAPI.getAll()
-      filterOptions.tags = Array.from(tags) // Set 轉 Array
-    } catch (error) {
-      console.error('獲取標籤列表失敗:', error)
-      filterOptions.tags = []
-    }
+    // 作者、出版商、標籤會從搜尋結果的 stats 中動態更新
+    // 初始時設為空陣列
+    filterOptions.authors = []
+    filterOptions.publishers = []
+    filterOptions.tags = []
   } catch (error) {
     console.error('獲取篩選選項失敗:', error)
   }
