@@ -61,10 +61,10 @@ const formatDate = (dateString) => {
 const handleRenew = async (loanId) => {
   try {
     await userStore.renewLoan(loanId)
-    alert('續借成功！')
+    alert('V續借成功！')
     await fetchLoans()
   } catch (error) {
-    alert('續借失敗：' + error)
+    alert('V續借失敗：' + error)
   }
 }
 
