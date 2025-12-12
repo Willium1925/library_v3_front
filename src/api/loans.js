@@ -12,14 +12,14 @@ export const loansAPI = {
    * 獲取借閱歷史
    */
   getHistory() {
-    return apiClient.get('/loans/history')
+    return apiClient.get('/loans/my-history')
   },
 
   /**
    * 獲取逾期借閱
    */
   getOverdue() {
-    return apiClient.get('/loans/overdue')
+    return apiClient.get('/loans/my-overdue')
   },
 
   /**
@@ -35,7 +35,7 @@ export const loansAPI = {
    * @param {string} uniqueCode - 書籍副本唯一碼
    */
   borrow(uniqueCode) {
-    return apiClient.post('/loans/borrow', { uniqueCode })
+    return apiClient.post('/borrow', { uniqueCode })
   },
 
   /**
@@ -43,7 +43,7 @@ export const loansAPI = {
    * @param {string} uniqueCode - 書籍副本唯一碼
    */
   return(uniqueCode) {
-    return apiClient.post('/loans/return', { uniqueCode })
+    return apiClient.post('/return', { uniqueCode })
   }
 }
 

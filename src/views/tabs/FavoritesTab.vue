@@ -6,14 +6,19 @@
       <BookListCard
         v-for="favorite in favorites"
         :key="favorite.id"
-        :book="favorite"
+        :book="{
+          id: favorite.bookId,
+          title: favorite.title,
+          author: favorite.author,
+          imageUrl: favorite.imageUrl,
+          uniqueCode: '—'
+        }"
       >
         <template #meta>
-          <div class="card-meta">書籍碼：{{ favorite.copyUniqueCode || '—' }}</div>
           <div class="card-meta">收藏日期：{{ formatDate(favorite.createdAt) }}</div>
         </template>
         <template #status>
-          <button class="btn btn-sm btn-outline-danger" @click="handleRemove(favorite.id)">
+          <button class="btn btn-sm btn-outline-danger" @click="handleRemove(favorite.bookId)">
             <i class="fa-regular fa-trash-can"></i> 取消收藏
           </button>
         </template>
@@ -33,24 +38,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useUserStore } from '../../stores/user'
+import { ref, onMounted, computed } from 'vue'
+import { useFavoritesStore } from '../../stores/favorites'
 import BookListCard from '../../components/user/BookListCard.vue'
 
-const userStore = useUserStore()
+const favoritesStore = useFavoritesStore()
 
-const loading = ref(false)
-const favorites = ref([])
+const loading = computed(() => favoritesStore.loading)
+const favorites = computed(() => favoritesStore.favorites)
 
 const fetchFavorites = async () => {
   try {
-    loading.value = true
-    // TODO: 待後端 API 實作
-    favorites.value = userStore.favorites
+    await favoritesStore.fetchFavorites()
   } catch (error) {
     console.error('獲取收藏清單失敗:', error)
-  } finally {
-    loading.value = false
   }
 }
 
@@ -60,14 +61,12 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('zh-TW')
 }
 
-const handleRemove = async (favoriteId) => {
+const handleRemove = async (bookId) => {
   if (confirm('確定要取消收藏嗎？')) {
     try {
-      // TODO: 待後端 API 實作
-      alert('取消收藏功能開發中')
-      await fetchFavorites()
+      await favoritesStore.removeFavorite(bookId)
     } catch (error) {
-      alert('取消收藏失敗：' + error)
+      alert('取消收藏失敗：' + (error.message || error))
     }
   }
 }

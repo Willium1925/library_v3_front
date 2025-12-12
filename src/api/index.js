@@ -33,8 +33,11 @@ apiClient.interceptors.response.use(
     if (error.response) {
       // 伺服器返回錯誤狀態碼
       const { status, data } = error.response
-      
+
       switch (status) {
+        case 400:
+          console.error('無效操作')
+          break
         case 401:
           // Token 過期或未授權
           console.error('未授權，請重新登入')
@@ -51,10 +54,10 @@ apiClient.interceptors.response.use(
           console.error('伺服器錯誤')
           break
         default:
-          console.error('請求失敗:', data?.message || '帳號或密碼錯誤')
+          console.error('請求失敗:', data?.message || '請求錯誤')
       }
-      
-      return Promise.reject(data?.message || '帳號或密碼錯誤')
+
+      return Promise.reject(data?.message || '未知錯誤，請稍後重試')
     } else if (error.request) {
       // 請求已發出但沒有收到響應
       console.error('網路錯誤，請檢查網路連線')

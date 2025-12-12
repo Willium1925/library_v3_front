@@ -5,6 +5,9 @@
         :src="book.imageUrl || 'https://placehold.co/300x400/eee/333?text=No+Cover'"
         :alt="book.title"
       />
+      <div class="favorite-overlay">
+        <FavoriteButton :book-id="book.id" />
+      </div>
     </div>
     <div class="book-card__info" @click="goToDetail">
       <h3 class="book-card__title">{{ book.title }}</h3>
@@ -15,12 +18,12 @@
           :class="[
             'status-badge',
             {
-              'status-available': availableCount > 0,
-              'status-unavailable': availableCount === 0
+              'status-available': book.availableCount > 0,
+              'status-unavailable': book.availableCount === 0
             }
           ]"
         >
-          {{ availableCount > 0 ? `可借 ${availableCount} 本` : '全部借出' }}
+          {{ book.availableCount > 0 ? `可借 ${book.availableCount} 本` : '全部借出' }}
         </span>
       </div>
     </div>
@@ -30,6 +33,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import FavoriteButton from './FavoriteButton.vue'
 
 const props = defineProps({
   book: {
@@ -74,12 +78,24 @@ const goToDetail = () => {
   justify-content: center;
   overflow: hidden;
   cursor: pointer;
+  position: relative;
 }
 
 .book-card__img-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.favorite-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  opacity: 1; /* always visible */
+  transition: opacity 0.3s;
+  padding: 6px;
 }
 
 .book-card__info {
@@ -127,4 +143,3 @@ const goToDetail = () => {
   color: #fff;
 }
 </style>
-

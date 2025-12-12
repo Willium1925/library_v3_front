@@ -6,6 +6,14 @@
       <div class="login-card">
         <h1 class="login-title">會員登入</h1>
         
+        <!-- 快速填入按鈕 -->
+        <div class="quick-fill" aria-hidden="false">
+          <button type="button" class="quick-btn" @click="fillQuick('adminJAVA1925', '123456789')">Admin</button>
+          <button type="button" class="quick-btn" @click="fillQuick('citizen777', '123456789')">Citizen</button>
+          <button type="button" class="quick-btn" @click="fillQuick('user1925', '123456789')">User</button>
+          <small class="quick-hint">快速填入測試帳號</small>
+        </div>
+
         <form @submit.prevent="handleLogin" class="login-form">
           <div class="form-group">
             <label for="account">帳號</label>
@@ -67,6 +75,12 @@ const formData = reactive({
 const loading = ref(false)
 const errorMessage = ref('')
 
+// 快速填入處理函式
+const fillQuick = (account, password) => {
+  formData.account = account
+  formData.password = password
+}
+
 const handleLogin = async () => {
   errorMessage.value = ''
   
@@ -124,6 +138,36 @@ const handleLogin = async () => {
   text-align: center;
   margin-bottom: 40px;
   color: var(--primary);
+}
+
+/* 快速填入按鈕樣式 */
+.quick-fill {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.quick-btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px dashed var(--primary);
+  background: rgba(0,0,0,0.02);
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary);
+}
+.quick-btn:hover {
+  background: rgba(0,0,0,0.04);
+}
+.quick-hint {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  color: var(--gray);
+  margin-top: 6px;
 }
 
 .login-form {
@@ -217,4 +261,3 @@ const handleLogin = async () => {
   opacity: 0.7;
 }
 </style>
-
