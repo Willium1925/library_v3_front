@@ -1,11 +1,6 @@
 <template>
   <div class="notification-tab">
-    <div class="panel-header">
-      <h2>通知中心</h2>
-      <button v-if="unreadCount > 0" @click="markAllAsRead" class="mark-all-btn">
-        全部標示為已讀
-      </button>
-    </div>
+    <h2 class="panel-header">通知中心</h2>
     
     <div v-if="!loading && notifications.length > 0" class="notifications-list">
       <div
@@ -15,12 +10,12 @@
         :class="{ unread: !notif.isRead }"
         @click="handleNotificationClick(notif)"
       >
-        <div class="notif-content-wrapper">
+        <div>
           <div class="notif-title">
             <span v-if="!notif.isRead" class="badge-dot"></span>
             {{ notif.title }}
           </div>
-          <p class="notif-content">{{ notif.message }}</p>
+          <div class="notif-content">{{ notif.message }}</div>
         </div>
         <div class="notif-date">{{ formatDate(notif.createdAt) }}</div>
       </div>
@@ -49,15 +44,8 @@ const notifications = computed(() => notificationStore.notifications)
 const unreadCount = computed(() => notificationStore.unreadCount)
 
 const formatDate = (dateString) => {
+  if (!dateString) return '—'
   const date = new Date(dateString)
-  const now = new Date()
-  const diff = Math.floor((now - date) / 1000)
-  
-  if (diff < 60) return '剛剛'
-  if (diff < 3600) return `${Math.floor(diff / 60)} 分鐘前`
-  if (diff < 86400) return `${Math.floor(diff / 3600)} 小時前`
-  if (diff < 604800) return `${Math.floor(diff / 86400)} 天前`
-  
   return date.toLocaleDateString('zh-TW')
 }
 
@@ -88,37 +76,18 @@ onMounted(() => {
   margin-bottom: 30px;
   padding-bottom: 15px;
   border-bottom: 2px solid var(--primary);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.mark-all-btn {
-  font-size: 14px;
-  color: var(--primary);
-  background: none;
-  border: 1px solid var(--primary);
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.mark-all-btn:hover {
-  background: var(--primary);
-  color: #fff;
 }
 
 .notifications-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
 .notif-item {
   background: #fff;
   border: 1px solid var(--light-border);
   padding: 20px;
+  margin-bottom: 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -136,16 +105,10 @@ onMounted(() => {
   background: #fffafa;
 }
 
-.notif-content-wrapper {
-  flex: 1;
-}
-
 .notif-title {
   font-weight: 700;
   font-size: 16px;
   margin-bottom: 5px;
-  display: flex;
-  align-items: center;
 }
 
 .badge-dot {

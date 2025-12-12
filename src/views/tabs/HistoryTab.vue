@@ -3,23 +3,21 @@
     <h2 class="panel-header">借閱歷史</h2>
     
     <div v-if="!loading && history.length > 0" class="history-list">
-      <div v-for="record in history" :key="record.id" class="history-item">
-        <div class="book-info">
-          <h4 class="book-title">{{ record.bookTitle }}</h4>
-          <p class="book-meta">作者：{{ record.author }}</p>
-          <p class="book-meta">館藏編號：{{ record.copyUniqueCode }}</p>
-        </div>
-        <div class="date-info">
-          <div class="date-row">
-            <span class="date-label">借閱日：</span>
-            <span>{{ formatDate(record.loanDate) }}</span>
-          </div>
-          <div class="date-row">
-            <span class="date-label">歸還日：</span>
-            <span>{{ formatDate(record.returnDate) }}</span>
-          </div>
-        </div>
-      </div>
+      <BookListCard
+        v-for="record in history"
+        :key="record.id"
+        :book="record"
+        class="history-card"
+      >
+        <template #meta>
+          <div class="card-meta">書籍碼：{{ record.copyUniqueCode }}</div>
+          <div class="card-meta">借閱：{{ formatDate(record.loanDate) }}｜到期：{{ formatDate(record.dueDate) }}</div>
+          <div class="card-meta">歸還：{{ formatDate(record.returnDate) }}</div>
+        </template>
+        <template #status>
+          <span style="color:var(--gray); font-size:14px;">已歸還</span>
+        </template>
+      </BookListCard>
     </div>
     
     <div v-else-if="loading" class="loading">
@@ -37,6 +35,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '../../stores/user'
+import BookListCard from '../../components/user/BookListCard.vue'
 
 const userStore = useUserStore()
 
@@ -83,50 +82,11 @@ onMounted(() => {
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
-.history-item {
-  background: #fff;
-  border: 1px solid var(--light-border);
-  border-radius: 8px;
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.book-info {
-  flex: 1;
-}
-
-.book-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.book-meta {
-  font-size: 13px;
-  color: var(--gray);
-  margin-bottom: 4px;
-}
-
-.date-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 13px;
-}
-
-.date-row {
-  display: flex;
-  gap: 10px;
-}
-
-.date-label {
-  font-weight: 500;
-  color: var(--gray);
+.history-card {
+  opacity: 0.8;
+  background: #fdfdfd;
 }
 
 .loading,

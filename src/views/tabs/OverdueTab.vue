@@ -1,24 +1,22 @@
 <template>
-  <div class="reservations-tab">
-    <h2 class="panel-header">我的預約</h2>
+  <div class="overdue-tab">
+    <h2 class="panel-header overdue-header">逾期未還</h2>
     
-    <div v-if="!loading && reservations.length > 0" class="reservations-list">
+    <div v-if="!loading && overdueLoans.length > 0" class="overdue-list">
       <BookListCard
-        v-for="reservation in reservations"
-        :key="reservation.id"
-        :book="reservation"
+        v-for="loan in overdueLoans"
+        :key="loan.id"
+        :book="loan"
+        :is-overdue="true"
       >
         <template #meta>
-          <div class="card-meta">書籍碼：{{ reservation.copyUniqueCode }}</div>
-          <div class="card-meta">預約日期：{{ formatDate(reservation.reservedAt) }}</div>
+          <div class="card-meta">借閱日期：{{ formatDate(loan.loanDate) }}</div>
+          <div class="card-meta">到期日期：{{ formatDate(loan.dueDate) }}</div>
         </template>
         <template #status>
-          <span v-if="reservation.status === 'NOTIFIED'" class="status-pill ready">可取書</span>
-          <span v-else class="status-pill waiting">等候到館</span>
-          <div v-if="reservation.status === 'NOTIFIED'" style="font-size:13px;">
-            預計保留至<br>{{ formatDate(reservation.pickupDeadline) }}
+          <div class="overdue-text">
+            <i class="fa-solid fa-triangle-exclamation"></i> 已逾期 {{ calculateOverdueDays(loan.dueDate) }} 天
           </div>
-          <div v-else style="font-size:13px;">順位：{{ reservation.queuePosition }}</div>
         </template>
       </BookListCard>
     </div>
@@ -29,8 +27,8 @@
     </div>
     
     <div v-else class="no-data">
-      <i class="fa-regular fa-bookmark"></i>
-      <p>目前無預約記錄</p>
+      <i class="fa-regular fa-circle-check"></i>
+      <p>目前無逾期書籍</p>
     </div>
   </div>
 </template>
@@ -43,15 +41,15 @@ import BookListCard from '../../components/user/BookListCard.vue'
 const userStore = useUserStore()
 
 const loading = ref(false)
-const reservations = ref([])
+const overdueLoans = ref([])
 
-const fetchReservations = async () => {
+const fetchOverdueLoans = async () => {
   try {
     loading.value = true
-    await userStore.fetchReservations()
-    reservations.value = userStore.reservations
+    await userStore.fetchOverdueLoans()
+    overdueLoans.value = userStore.overdueLoans
   } catch (error) {
-    console.error('獲取預約記錄失敗:', error)
+    console.error('獲取逾期記錄失敗:', error)
   } finally {
     loading.value = false
   }
@@ -63,13 +61,21 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('zh-TW')
 }
 
+const calculateOverdueDays = (dueDateString) => {
+  const dueDate = new Date(dueDateString)
+  const now = new Date()
+  const diffTime = now - dueDate
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  return diffDays > 0 ? diffDays : 0
+}
+
 onMounted(() => {
-  fetchReservations()
+  fetchOverdueLoans()
 })
 </script>
 
 <style scoped>
-.reservations-tab {
+.overdue-tab {
   animation: fadeIn 0.3s;
 }
 
@@ -82,29 +88,21 @@ onMounted(() => {
   border-bottom: 2px solid var(--primary);
 }
 
-.reservations-list {
+.overdue-header {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.overdue-list {
   display: flex;
   flex-direction: column;
 }
 
-.status-pill {
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 12px;
+.overdue-text {
+  color: var(--accent);
   font-weight: 700;
-  margin-bottom: 10px;
-  display: inline-block;
-}
-
-.status-pill.ready {
-  background: #e8f5e9;
-  color: var(--success);
-  border: 1px solid var(--success);
-}
-
-.status-pill.waiting {
-  background: #eee;
-  color: var(--gray);
+  font-size: 14px;
+  margin-top: 10px;
 }
 
 .loading,

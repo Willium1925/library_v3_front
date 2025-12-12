@@ -1,19 +1,21 @@
 <template>
-  <div class="loans-tab">
-    <h2 class="panel-header">目前借閱</h2>
+  <div class="favorites-tab">
+    <h2 class="panel-header">收藏清單</h2>
     
-    <div v-if="!loading && loans.length > 0" class="loans-list">
+    <div v-if="!loading && favorites.length > 0" class="favorites-list">
       <BookListCard
-        v-for="loan in loans"
-        :key="loan.id"
-        :book="loan"
+        v-for="favorite in favorites"
+        :key="favorite.id"
+        :book="favorite"
       >
         <template #meta>
-          <div class="card-meta">借閱日期：{{ formatDate(loan.loanDate) }}</div>
-          <div class="card-meta" style="color:var(--primary); font-weight:700;">到期日期：{{ formatDate(loan.dueDate) }}</div>
+          <div class="card-meta">書籍碼：{{ favorite.copyUniqueCode || '—' }}</div>
+          <div class="card-meta">收藏日期：{{ formatDate(favorite.createdAt) }}</div>
         </template>
         <template #status>
-          <button class="btn btn-sm" @click="handleRenew(loan.id)">續借</button>
+          <button class="btn btn-sm btn-outline-danger" @click="handleRemove(favorite.id)">
+            <i class="fa-regular fa-trash-can"></i> 取消收藏
+          </button>
         </template>
       </BookListCard>
     </div>
@@ -24,8 +26,8 @@
     </div>
     
     <div v-else class="no-data">
-      <i class="fa-regular fa-circle-xmark"></i>
-      <p>目前無借閱記錄</p>
+      <i class="fa-regular fa-heart"></i>
+      <p>尚無收藏書籍</p>
     </div>
   </div>
 </template>
@@ -38,15 +40,15 @@ import BookListCard from '../../components/user/BookListCard.vue'
 const userStore = useUserStore()
 
 const loading = ref(false)
-const loans = ref([])
+const favorites = ref([])
 
-const fetchLoans = async () => {
+const fetchFavorites = async () => {
   try {
     loading.value = true
-    await userStore.fetchCurrentLoans()
-    loans.value = userStore.currentLoans
+    // TODO: 待後端 API 實作
+    favorites.value = userStore.favorites
   } catch (error) {
-    console.error('獲取借閱記錄失敗:', error)
+    console.error('獲取收藏清單失敗:', error)
   } finally {
     loading.value = false
   }
@@ -58,23 +60,25 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('zh-TW')
 }
 
-const handleRenew = async (loanId) => {
-  try {
-    await userStore.renewLoan(loanId)
-    alert('續借成功！')
-    await fetchLoans()
-  } catch (error) {
-    alert('續借失敗：' + error)
+const handleRemove = async (favoriteId) => {
+  if (confirm('確定要取消收藏嗎？')) {
+    try {
+      // TODO: 待後端 API 實作
+      alert('取消收藏功能開發中')
+      await fetchFavorites()
+    } catch (error) {
+      alert('取消收藏失敗：' + error)
+    }
   }
 }
 
 onMounted(() => {
-  fetchLoans()
+  fetchFavorites()
 })
 </script>
 
 <style scoped>
-.loans-tab {
+.favorites-tab {
   animation: fadeIn 0.3s;
 }
 
@@ -87,7 +91,7 @@ onMounted(() => {
   border-bottom: 2px solid var(--primary);
 }
 
-.loans-list {
+.favorites-list {
   display: flex;
   flex-direction: column;
 }
@@ -100,6 +104,9 @@ onMounted(() => {
   cursor: pointer;
   transition: 0.2s;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn:hover {
@@ -110,6 +117,16 @@ onMounted(() => {
 .btn-sm {
   padding: 5px 15px;
   font-size: 13px;
+}
+
+.btn-outline-danger {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-outline-danger:hover {
+  background: var(--accent);
+  color: #fff;
 }
 
 .loading,
@@ -128,13 +145,6 @@ onMounted(() => {
   margin-bottom: 15px;
   opacity: 0.5;
 }
-
-.card-meta {
-  font-size: 13px;
-  color: #555;
-  margin-bottom: 4px;
-}
-
 
 @keyframes fadeIn {
   from {

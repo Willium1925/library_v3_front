@@ -10,6 +10,7 @@
           :key="tab.id"
           class="nav-item"
           :class="{ active: currentTab === tab.id }"
+          :style="tab.isWarning ? 'color: var(--accent);' : ''"
           @click="currentTab = tab.id"
         >
           <i :class="tab.icon"></i>
@@ -35,6 +36,8 @@ import ProfileTab from './tabs/ProfileTab.vue'
 import ReservationsTab from './tabs/ReservationsTab.vue'
 import LoansTab from './tabs/LoansTab.vue'
 import HistoryTab from './tabs/HistoryTab.vue'
+import OverdueTab from './tabs/OverdueTab.vue'
+import FavoritesTab from './tabs/FavoritesTab.vue'
 
 const notificationStore = useNotificationStore()
 
@@ -44,28 +47,39 @@ const tabs = computed(() => [
   {
     id: 'notifications',
     name: '通知中心',
-    icon: 'fa-solid fa-bell',
+    icon: 'fa-regular fa-bell',
     badge: notificationStore.unreadCount > 0 ? notificationStore.unreadCount : null
   },
   {
     id: 'profile',
-    name: '個人資料',
-    icon: 'fa-solid fa-user'
+    name: '個人檔案',
+    icon: 'fa-regular fa-id-card'
   },
   {
     id: 'reservations',
-    name: '我的預約',
-    icon: 'fa-solid fa-bookmark'
+    name: '預約書籍',
+    icon: 'fa-regular fa-calendar-check'
   },
   {
     id: 'loans',
     name: '目前借閱',
-    icon: 'fa-solid fa-book'
+    icon: 'fa-solid fa-book-open'
   },
   {
     id: 'history',
     name: '借閱歷史',
     icon: 'fa-solid fa-clock-rotate-left'
+  },
+  {
+    id: 'overdue',
+    name: '逾期未還',
+    icon: 'fa-solid fa-triangle-exclamation',
+    isWarning: true
+  },
+  {
+    id: 'favorites',
+    name: '收藏清單',
+    icon: 'fa-regular fa-heart'
   }
 ])
 
@@ -75,7 +89,9 @@ const currentTabComponent = computed(() => {
     profile: ProfileTab,
     reservations: ReservationsTab,
     loans: LoansTab,
-    history: HistoryTab
+    history: HistoryTab,
+    overdue: OverdueTab,
+    favorites: FavoritesTab
   }
   return components[currentTab.value] || NotificationTab
 })

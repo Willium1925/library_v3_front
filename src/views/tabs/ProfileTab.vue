@@ -4,43 +4,33 @@
     
     <div v-if="user" class="profile-card">
       <div class="profile-grid">
-        <span class="p-label">姓名：</span>
-        <span class="p-value">{{ user.name }}</span>
+        <div class="p-label">姓名</div>
+        <div class="p-value">{{ user.name }}</div>
         
-        <span class="p-label">帳號：</span>
-        <span class="p-value">{{ user.account }}</span>
+        <div class="p-label">借書證號</div>
+        <div class="p-value">{{ user.cardId }}</div>
         
-        <span class="p-label">身份：</span>
-        <span class="p-value">
+        <div class="p-label">帳號</div>
+        <div class="p-value">{{ user.account }}</div>
+        
+        <div class="p-label">電子信箱</div>
+        <div class="p-value">{{ user.email }}</div>
+        
+        <div class="p-label">手機號碼</div>
+        <div class="p-value">{{ user.phone }}</div>
+        
+        <div class="p-label">通訊地址</div>
+        <div class="p-value">{{ user.address }}</div>
+        
+        <div class="p-label">身份類別</div>
+        <div class="p-value">
           <span class="identity-badge">{{ getRoleText(user.role) }}</span>
-        </span>
-        
-        <span class="p-label">狀態：</span>
-        <span class="p-value">
-          <span :class="getStatusClass(user.status)">{{ getStatusText(user.status) }}</span>
-          <span v-if="user.suspendedUntil" class="suspend-date">
-            （解除日期：{{ formatDate(user.suspendedUntil) }}）
-          </span>
-        </span>
-        
-        <span class="p-label">違約點數：</span>
-        <span class="p-value">
-          <span class="penalty-points">{{ user.penaltyPoints || 0 }} 點</span>
-        </span>
-        
-        <span class="p-label">註冊日期：</span>
-        <span class="p-value">{{ formatDate(user.createdAt) }}</span>
+        </div>
       </div>
       
       <div class="profile-actions">
-        <button class="btn btn-primary" @click="handleEditProfile">
-          <i class="fa-solid fa-pen"></i>
-          編輯資料
-        </button>
-        <button class="btn btn-secondary" @click="handleChangePassword">
-          <i class="fa-solid fa-key"></i>
-          修改密碼
-        </button>
+        <button class="btn" @click="handleEditProfile">編輯資料</button>
+        <button class="btn btn-outline-danger" @click="handleChangePassword">更改密碼</button>
       </div>
     </div>
   </div>
@@ -56,33 +46,10 @@ const user = computed(() => authStore.user)
 const getRoleText = (role) => {
   const roleMap = {
     'ROLE_USER': '一般使用者',
-    'ROLE_CITIZEN': '台中市民',
+    'ROLE_CITIZEN': '市民',
     'ROLE_ADMIN': '管理員'
   }
   return roleMap[role] || role
-}
-
-const getStatusText = (status) => {
-  const statusMap = {
-    'PENDING': '尚未啟用，請攜帶相關證件至本館開通',
-    'ACTIVE': '正常',
-    'SUSPENDED': '停權中'
-  }
-  return statusMap[status] || status
-}
-
-const getStatusClass = (status) => {
-  return {
-    'status-pending': status === 'PENDING',
-    'status-active': status === 'ACTIVE',
-    'status-suspended': status === 'SUSPENDED'
-  }
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return '—'
-  const date = new Date(dateString)
-  return date.toLocaleDateString('zh-TW')
 }
 
 const handleEditProfile = () => {
@@ -150,32 +117,6 @@ const handleChangePassword = () => {
   border-radius: 4px;
 }
 
-.status-pending {
-  color: #ff9800;
-  font-weight: 700;
-}
-
-.status-active {
-  color: var(--success);
-  font-weight: 700;
-}
-
-.status-suspended {
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.suspend-date {
-  font-size: 12px;
-  color: var(--gray);
-  margin-left: 10px;
-}
-
-.penalty-points {
-  color: var(--accent);
-  font-weight: 700;
-}
-
 .profile-actions {
   display: flex;
   gap: 20px;
@@ -183,34 +124,27 @@ const handleChangePassword = () => {
 
 .btn {
   padding: 10px 25px;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
+  border: 1px solid var(--primary);
+  background: transparent;
+  font-weight: 700;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s;
+  transition: 0.2s;
+  font-size: 14px;
 }
 
-.btn-primary {
+.btn:hover {
   background: var(--primary);
   color: #fff;
 }
 
-.btn-primary:hover {
-  background: var(--gray);
+.btn-outline-danger {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
-.btn-secondary {
-  background: #f0f0f0;
-  color: var(--primary);
-  border: 1px solid var(--light-border);
-}
-
-.btn-secondary:hover {
-  background: #e0e0e0;
+.btn-outline-danger:hover {
+  background: var(--accent);
+  color: #fff;
 }
 </style>
 
