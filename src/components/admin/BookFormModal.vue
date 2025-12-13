@@ -377,6 +377,7 @@ const canProceed = computed(() => {
     return formData.value.title && 
            formData.value.categorySubId && 
            formData.value.publisherId &&
+           formData.value.authorIds && 
            formData.value.authorIds.length > 0
   }
   return true
@@ -408,8 +409,11 @@ const onMainCategoryChange = () => {
 }
 
 // 作者操作
-const isAuthorSelected = (id) => formData.value.authorIds.includes(id)
+const isAuthorSelected = (id) => formData.value.authorIds && formData.value.authorIds.includes(id)
 const toggleAuthor = (author) => {
+  if (!formData.value.authorIds) {
+    formData.value.authorIds = []
+  }
   const index = formData.value.authorIds.indexOf(author.id)
   if (index > -1) {
     formData.value.authorIds.splice(index, 1)
@@ -427,8 +431,11 @@ const getAuthorName = (id) => {
 }
 
 // 標籤操作
-const isTagSelected = (id) => formData.value.tagIds.includes(id)
+const isTagSelected = (id) => formData.value.tagIds && formData.value.tagIds.includes(id)
 const toggleTag = (tag) => {
+  if (!formData.value.tagIds) {
+    formData.value.tagIds = []
+  }
   const index = formData.value.tagIds.indexOf(tag.id)
   if (index > -1) {
     formData.value.tagIds.splice(index, 1)
@@ -563,6 +570,8 @@ const handleClose = () => {
   emit('close')
   // 重置表單
   currentStep.value = 1
+  authorSearch.value = ''
+  tagSearch.value = ''
   formData.value = {
     title: '',
     isbn: '',
@@ -580,15 +589,94 @@ const handleClose = () => {
 }
 
 // 監聽編輯模式資料
-watch(() => props.bookData, (newData) => {
-  if (newData && props.mode === 'edit') {
-    formData.value = {
-      ...newData,
-      mainCategoryId: newData.mainCategoryId || null,
-      copies: newData.copies || []
+// 監聽 props 變化，初始化表單資料
+watch(() => props.isVisible, async (newVal) => {
+  if (newVal) {
+    await loadOptions()
+    
+    if (props.mode === 'edit' && props.bookData) {
+      // 編輯模式：從後端資料轉換為表單格式
+      await initEditForm()
+    } else {
+      // 新增模式：重置表單
+      resetForm()
     }
   }
 }, { immediate: true })
+
+// 初始化編輯表單
+const initEditForm = async () => {
+  const data = props.bookData
+  
+  // 基本資料
+  formData.value.title = data.title || ''
+  formData.value.isbn = data.isbn || ''
+  formData.value.publishYear = data.publishYear || null
+  formData.value.imageUrl = data.imageUrl || ''
+  formData.value.representative = data.representative || false
+  
+  // 根據名稱查找對應的 ID
+  
+  // 1. 出版商
+  const publisher = publishers.value.find(p => p.pubName === data.publisher)
+  formData.value.publisherId = publisher ? publisher.id : null
+  
+  // 2. 主分類和子分類
+  const mainCat = mainCategories.value.find(cat => 
+    cat.categorySubs?.some(sub => sub.categorySubTitle === data.subCategoryTitle)
+  )
+  if (mainCat) {
+    formData.value.mainCategoryId = mainCat.id
+    const subCat = mainCat.categorySubs.find(sub => sub.categorySubTitle === data.subCategoryTitle)
+    formData.value.categorySubId = subCat ? subCat.id : null
+  }
+  
+  // 3. 作者（從名稱轉換為 ID）
+  if (data.authors && Array.isArray(data.authors)) {
+    formData.value.authorIds = authors.value
+      .filter(a => data.authors.includes(a.name))
+      .map(a => a.id)
+  } else if (data.authors && typeof data.authors === 'object') {
+    // 如果是 Set，轉為陣列
+    const authorNames = Array.from(data.authors)
+    formData.value.authorIds = authors.value
+      .filter(a => authorNames.includes(a.name))
+      .map(a => a.id)
+  } else {
+    formData.value.authorIds = []
+  }
+  
+  // 4. 標籤（從名稱轉換為 ID）
+  if (data.tags && Array.isArray(data.tags)) {
+    formData.value.tagIds = tags.value
+      .filter(t => data.tags.includes(t.title))
+      .map(t => t.id)
+  } else if (data.tags && typeof data.tags === 'object') {
+    // 如果是 Set，轉為陣列
+    const tagTitles = Array.from(data.tags)
+    formData.value.tagIds = tags.value
+      .filter(t => tagTitles.includes(t.title))
+      .map(t => t.id)
+  } else {
+    formData.value.tagIds = []
+  }
+  
+  // 5. 系列
+  if (data.seriesTitle) {
+    const series = seriesList.value.find(s => s.seriesTitle === data.seriesTitle)
+    formData.value.seriesId = series ? series.id : null
+  } else {
+    formData.value.seriesId = null
+  }
+  
+  // 6. 副本
+  formData.value.copies = data.bookCopies ? 
+    Array.from(data.bookCopies).map(copy => ({
+      uniqueCode: copy.uniqueCode || copy['書籍碼'] || '',
+      stockedDate: copy.stockedDate || new Date().toISOString().split('T')[0],
+      status: copy.status || 'A'
+    })) : []
+}
 
 // 點擊外部關閉下拉
 const handleClickOutside = (e) => {
