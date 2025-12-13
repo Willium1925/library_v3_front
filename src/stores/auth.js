@@ -2,34 +2,58 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authAPI } from '../api/auth'
 
+
 export const useAuthStore = defineStore('auth', () => {
-  // State
-  const user = ref(null)
-  const token = ref(localStorage.getItem('token') || null)
-  
-  // Getters
-  const isAuthenticated = computed(() => !!token.value)
-  const userRole = computed(() => user.value?.role || null)
-  const isAdmin = computed(() => userRole.value === 'ROLE_ADMIN')
-  const isCitizen = computed(() => userRole.value === 'ROLE_CITIZEN')
-  
-  // Actions
-  async function login(credentials) {
-    try {
-      const response = await authAPI.login(credentials)
-      // LoginResponse 只返回 jwtToken
-      token.value = response.jwtToken
-      localStorage.setItem('token', response.jwtToken)
-      
-      // 登入成功後立即獲取使用者資料
-      await fetchUserProfile()
-      
-      return true
-    } catch (error) {
-      console.error('登入失敗:', error)
-      throw error
+    // State
+    const user = ref(null)
+    const token = ref(localStorage.getItem('token') || null)
+
+    // helper: decode JWT payload (base64url)
+    function decodeToken(t) {
+        if (!t) return null
+        try {
+            const payload = t.split('.')[1]
+            const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+            const padded = base64 + '='.repeat((4 - base64.length % 4) % 4)
+            return JSON.parse(atob(padded))
+        } catch {
+            return null
+        }
     }
-  }
+
+    // If token exists on init, set basic user info from token
+    if (token.value) {
+        const payload = decodeToken(token.value)
+        if (payload) user.value = { role: payload.role, username: payload.username || null }
+    }
+
+    // Getters
+    const isAuthenticated = computed(() => !!token.value)
+    const userRole = computed(() => user.value?.role || decodeToken(token.value)?.role || null)
+    const isAdmin = computed(() => userRole.value === 'ROLE_ADMIN')
+    const isCitizen = computed(() => userRole.value === 'ROLE_CITIZEN')
+
+    // Actions
+    async function login(credentials) {
+        try {
+            const response = await authAPI.login(credentials)
+            // LoginResponse 只返回 jwtToken
+            token.value = response.jwtToken
+            localStorage.setItem('token', response.jwtToken)
+
+            // 先從 token 解析 role，若後端有 getCurrentUser 會再覆蓋完整資料
+            const payload = decodeToken(response.jwtToken)
+            if (payload) user.value = { role: payload.role, username: payload.username || null }
+
+            // 登入成功後立即獲取使用者資料
+            await fetchUserProfile()
+
+            return true
+        } catch (error) {
+            console.error('登入失敗:', error)
+            throw error
+        }
+    }
   
   async function logout() {
     try {
