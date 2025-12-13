@@ -31,6 +31,11 @@ export const adminBooksAPI = {
     return apiClient.get(`/admin/books/${bookId}/copies`)
   },
 
+  // 新增書籍副本
+  createCopy(bookId, copyData) {
+    return apiClient.post(`/admin/books/${bookId}/copies`, copyData)
+  },
+
   // 刪除副本
   deleteCopy(copyId) {
     return apiClient.delete(`/admin/book-copies/${copyId}`)
@@ -46,6 +51,6 @@ export const adminBooksAPI = {
     return apiClient.get(`/admin/book-copies/${copyId}/reservation-history`)
   }
 }
-
 export default adminBooksAPI
+
 

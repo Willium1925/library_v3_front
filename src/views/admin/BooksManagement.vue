@@ -124,6 +124,15 @@
         </tbody>
       </table>
     </div>
+
+    <!-- 書籍表單 Modal -->
+    <BookFormModal
+      :is-visible="showBookModal"
+      :book-data="selectedBookForEdit"
+      :mode="modalMode"
+      @close="closeBookModal"
+      @success="handleBookSuccess"
+    />
   </div>
 </template>
 
@@ -132,6 +141,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import adminBooksAPI from '../../api/admin/books'
 import { categoriesAPI } from '../../api/categories'
+import BookFormModal from '../../components/admin/BookFormModal.vue'
 
 const router = useRouter()
 
@@ -141,6 +151,10 @@ const selectedBook = ref(null)
 const copies = ref([])
 
 const mainCategories = ref([])
+
+const showBookModal = ref(false)
+const selectedBookForEdit = ref(null)
+const modalMode = ref('create') // 'create' or 'edit'
 
 const filters = ref({
   mainCategoryId: null,
@@ -198,11 +212,30 @@ const clearFilters = () => {
 }
 
 const showCreateModal = () => {
-  alert('新增書籍功能開發中')
+  modalMode.value = 'create'
+  selectedBookForEdit.value = null
+  showBookModal.value = true
 }
 
-const editBook = (book) => {
-  alert('編輯書籍功能開發中：' + book.title)
+const editBook = async (book) => {
+  try {
+    // 獲取完整書籍資料（包含副本）
+    const fullBookData = await adminBooksAPI.getById(book.id)
+    modalMode.value = 'edit'
+    selectedBookForEdit.value = fullBookData
+    showBookModal.value = true
+  } catch (error) {
+    alert('獲取書籍資料失敗：' + error)
+  }
+}
+
+const closeBookModal = () => {
+  showBookModal.value = false
+  selectedBookForEdit.value = null
+}
+
+const handleBookSuccess = () => {
+  search() // 重新載入書籍列表
 }
 
 const deleteBook = async (id) => {

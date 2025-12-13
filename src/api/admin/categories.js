@@ -31,6 +31,6 @@ export const adminCategoriesAPI = {
     return apiClient.delete(`/admin/category-subs/${id}`)
   }
 }
-
 export default adminCategoriesAPI
+
 

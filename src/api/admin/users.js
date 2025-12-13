@@ -41,6 +41,6 @@ export const adminUsersAPI = {
     return apiClient.get(`/admin/users/${userId}/reservations`)
   }
 }
-
 export default adminUsersAPI
+
 

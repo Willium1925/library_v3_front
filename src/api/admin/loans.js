@@ -11,6 +11,6 @@ export const adminLoansAPI = {
     return apiClient.post('/loans/return', data)
   }
 }
-
 export default adminLoansAPI
+
 
