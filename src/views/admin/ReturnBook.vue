@@ -47,18 +47,24 @@
 
     <!-- 第三區：本次歸還清單 -->
     <div v-if="returnList.length > 0" class="return-list">
-      <h3>本次歸還清單</h3>
+      <h3>本次歸還清單（共 {{ returnList.length }} 本）</h3>
       <table class="data-table">
         <thead>
           <tr>
+            <th>書名</th>
             <th>書籍碼</th>
+            <th>借閱日期</th>
+            <th>到期日期</th>
             <th>歸還時間</th>
             <th>狀態</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(item, index) in returnList" :key="index">
+            <td>{{ item.bookTitle }}</td>
             <td>{{ item.uniqueCode }}</td>
+            <td>{{ formatDate(item.loanDate) }}</td>
+            <td>{{ formatDate(item.dueDate) }}</td>
             <td>{{ formatDateTime(item.returnTime) }}</td>
             <td class="text-success">{{ item.status }}</td>
           </tr>
@@ -71,6 +77,7 @@
 <script setup>
 import { ref } from 'vue'
 import adminLoansAPI from '../../api/admin/loans'
+import adminUsersAPI from '../../api/admin/users'
 
 const uniqueCode = ref('')
 const userInfo = ref(null)
@@ -85,28 +92,30 @@ const handleReturn = async () => {
 
   try {
     loading.value = true
-    const response = await adminLoansAPI.return({
-      uniqueCode: uniqueCode.value
-    })
+    const response = await adminLoansAPI.returnBook(uniqueCode.value)
 
-    if (response.success) {
-      alert('還書成功！')
-      // 將成功歸還的書籍加入清單
-      returnList.value.push({
-        uniqueCode: uniqueCode.value,
-        returnTime: new Date().toISOString(),
-        status: '已歸還'
-      })
-      
-      // 如果回應中有會員資訊，顯示它
-      if (response.userInfo) {
-        userInfo.value = response.userInfo
+    alert('還書成功！')
+    
+    // 將成功歸還的書籍加入清單
+    returnList.value.push({
+      uniqueCode: uniqueCode.value,
+      returnTime: new Date().toISOString(),
+      status: '已歸還',
+      bookTitle: response.bookTitle || '未知書名',
+      loanDate: response.loanDate,
+      dueDate: response.dueDate
+    })
+    
+    // 顯示會員資訊（歸還後的狀態）
+    if (response.borrowerCardId) {
+      try {
+        userInfo.value = await adminUsersAPI.getUserByCardId(response.borrowerCardId)
+      } catch (err) {
+        console.error('獲取會員資訊失敗:', err)
       }
-      
-      uniqueCode.value = ''
-    } else {
-      alert('還書失敗：' + (response.message || '未知錯誤'))
     }
+    
+    uniqueCode.value = ''
   } catch (error) {
     alert('還書失敗：' + error)
   } finally {
@@ -114,8 +123,13 @@ const handleReturn = async () => {
   }
 }
 
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('zh-TW')
+}
+
 const formatDateTime = (dateStr) => {
-  if (!dateStr) return ''
+  if (!dateStr) return '-'
   return new Date(dateStr).toLocaleString('zh-TW')
 }
 </script>
@@ -251,4 +265,3 @@ const formatDateTime = (dateStr) => {
   color: #111827;
 }
 </style>
-

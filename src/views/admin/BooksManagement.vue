@@ -11,15 +11,29 @@
     <!-- 篩選區 -->
     <div class="filter-section">
       <div class="filter-row">
+        <select v-model="filters.mainCategoryId" @change="onMainCategoryChange">
+          <option :value="null">所有主分類</option>
+          <option v-for="cat in mainCategories" :key="cat.id" :value="cat.id">
+            {{ cat.categoryTitle }}
+          </option>
+        </select>
+        <select v-model="filters.subCategoryId" :disabled="!filters.mainCategoryId">
+          <option :value="null">所有次分類</option>
+          <option v-for="sub in currentSubCategories" :key="sub.id" :value="sub.id">
+            {{ sub.categorySubTitle }}
+          </option>
+        </select>
         <input v-model="filters.keyword" placeholder="書名關鍵字" />
         <input v-model="filters.authorKeyword" placeholder="作者關鍵字" />
         <input v-model="filters.publisherKeyword" placeholder="出版商關鍵字" />
+      </div>
+      <div class="filter-row">
         <input v-model="filters.isbn" placeholder="ISBN" />
         <input v-model="filters.publishYear" placeholder="出版年份" type="number" />
-      </div>
-      <div class="filter-actions">
-        <button class="btn btn-secondary" @click="clearFilters">清除篩選</button>
-        <button class="btn btn-primary" @click="search">執行搜尋</button>
+        <div class="filter-actions">
+          <button class="btn btn-secondary" @click="clearFilters">清除篩選</button>
+          <button class="btn btn-primary" @click="search">執行搜尋</button>
+        </div>
       </div>
     </div>
 
@@ -114,9 +128,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import adminBooksAPI from '../../api/admin/books'
+import { categoriesAPI } from '../../api/categories'
 
 const router = useRouter()
 
@@ -125,13 +140,36 @@ const books = ref([])
 const selectedBook = ref(null)
 const copies = ref([])
 
+const mainCategories = ref([])
+
 const filters = ref({
+  mainCategoryId: null,
+  subCategoryId: null,
   keyword: '',
   authorKeyword: '',
   publisherKeyword: '',
   isbn: '',
   publishYear: null
 })
+
+const currentSubCategories = computed(() => {
+  if (!filters.value.mainCategoryId) return []
+  const mainCat = mainCategories.value.find(c => c.id === filters.value.mainCategoryId)
+  return mainCat ? mainCat.categorySubs || [] : []
+})
+
+const onMainCategoryChange = () => {
+  // 當主分類改變時，重置次分類
+  filters.value.subCategoryId = null
+}
+
+const loadCategories = async () => {
+  try {
+    mainCategories.value = await categoriesAPI.getAll()
+  } catch (error) {
+    console.error('載入分類失敗:', error)
+  }
+}
 
 const search = async () => {
   try {
@@ -148,6 +186,8 @@ const search = async () => {
 
 const clearFilters = () => {
   filters.value = {
+    mainCategoryId: null,
+    subCategoryId: null,
     keyword: '',
     authorKeyword: '',
     publisherKeyword: '',
@@ -205,7 +245,10 @@ const formatDateTime = (date) => {
 }
 
 // 初始載入
-search()
+onMounted(() => {
+  loadCategories()
+  search()
+})
 </script>
 
 <style scoped>
@@ -241,11 +284,17 @@ search()
   margin-bottom: 12px;
 }
 
+.filter-row select,
 .filter-row input {
   padding: 8px 12px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
+}
+
+.filter-row select:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
 }
 
 .filter-actions {

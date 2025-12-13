@@ -54,6 +54,13 @@
                   <i class="fa-solid fa-edit"></i>
                 </button>
                 <button 
+                  class="btn-icon"
+                  @click="toggleSubCategories(cat.id)"
+                  :title="selectedMainCategoryId === cat.id ? '隱藏子分類' : '顯示子分類'"
+                >
+                  <i :class="selectedMainCategoryId === cat.id ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                </button>
+                <button 
                   class="btn-icon text-danger"
                   @click="deleteMainCategory(cat.id)"
                 >
@@ -66,9 +73,9 @@
       </div>
 
       <!-- 子分類區（右） -->
-      <div class="category-section">
+      <div class="category-section" v-if="selectedMainCategoryId">
         <div class="section-header">
-          <h3>子分類</h3>
+          <h3>子分類（{{ selectedMainCategoryName }}）</h3>
           <button class="btn btn-primary btn-sm" @click="addSubCategory">
             <i class="fa-solid fa-plus"></i>
             新增
@@ -83,7 +90,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="sub in subCategories" :key="sub.id">
+            <tr v-for="sub in currentSubCategories" :key="sub.id">
               <td>{{ sub.id }}</td>
               <td>
                 <input 
@@ -126,27 +133,47 @@
           </tbody>
         </table>
       </div>
+      <div class="category-section empty-section" v-else>
+        <p class="text-muted">請選擇主分類以顯示子分類</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { categoriesAPI } from '../../api/categories'
 import adminCategoriesAPI from '../../api/admin/categories'
 
 const mainCategories = ref([])
-const subCategories = ref([])
+const selectedMainCategoryId = ref(null)
+const selectedMainCategoryName = ref('')
 const editingMain = ref(null)
 const editingSub = ref(null)
+
+const currentSubCategories = computed(() => {
+  if (!selectedMainCategoryId.value) return []
+  const mainCat = mainCategories.value.find(c => c.id === selectedMainCategoryId.value)
+  return mainCat ? mainCat.categorySubs || [] : []
+})
 
 const loadData = async () => {
   try {
     const cats = await categoriesAPI.getAll()
     mainCategories.value = cats
-    subCategories.value = cats.flatMap(c => c.categorySubs || [])
   } catch (error) {
     alert('載入失敗：' + error)
+  }
+}
+
+const toggleSubCategories = (categoryId) => {
+  if (selectedMainCategoryId.value === categoryId) {
+    selectedMainCategoryId.value = null
+    selectedMainCategoryName.value = ''
+  } else {
+    selectedMainCategoryId.value = categoryId
+    const cat = mainCategories.value.find(c => c.id === categoryId)
+    selectedMainCategoryName.value = cat ? cat.categoryTitle : ''
   }
 }
 
@@ -189,13 +216,18 @@ const deleteMainCategory = async (id) => {
 }
 
 const addSubCategory = () => {
+  if (!selectedMainCategoryId.value) {
+    alert('請先選擇主分類')
+    return
+  }
+  
   const title = prompt('請輸入子分類名稱：')
   if (!title) return
   
-  const categoryId = prompt('請輸入所屬主分類ID：')
-  if (!categoryId) return
-  
-  adminCategoriesAPI.createSub({ categorySubTitle: title, categoryId: parseInt(categoryId) })
+  adminCategoriesAPI.createSub({ 
+    categorySubTitle: title, 
+    mainCategoryId: selectedMainCategoryId.value 
+  })
     .then(() => {
       alert('新增成功')
       loadData()
@@ -256,6 +288,18 @@ onMounted(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+}
+
+.empty-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.text-muted {
+  color: #6b7280;
+  font-size: 14px;
 }
 
 .category-section {
