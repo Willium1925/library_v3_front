@@ -32,6 +32,9 @@
           <tr>
             <th>ID</th>
             <th>書名</th>
+            <th>系列</th>
+            <th>主分類</th>
+            <th>次分類</th>
             <th>作者</th>
             <th>出版年份</th>
             <th>出版商</th>
@@ -47,6 +50,9 @@
           <tr v-for="book in books" :key="book.id">
             <td>{{ book.id }}</td>
             <td>{{ book.title }}</td>
+            <td>{{ book.seriesTitle }}</td>
+            <td>{{ book.mainCategoryTitle}}</td>
+            <td>{{ book.subCategoryTitle }}</td>
             <td>{{ book.authors?.join('、') || '-' }}</td>
             <td>{{ book.publishYear || '-' }}</td>
             <td>{{ book.publisherName || '-' }}</td>
@@ -131,7 +137,8 @@ const search = async () => {
   try {
     loading.value = true
     const response = await adminBooksAPI.search(filters.value)
-    books.value = response.books || []
+    books.value = response.bookPage.content || []
+    console.log(response)
   } catch (error) {
     alert('搜尋失敗：' + error)
   } finally {
