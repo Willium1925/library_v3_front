@@ -15,9 +15,9 @@
             <span v-if="!notif.isRead" class="badge-dot"></span>
             {{ notif.title }}
           </div>
-          <div class="notif-content">{{ notif.message }}</div>
+          <div class="notif-content">{{ notif.content }}</div>
         </div>
-        <div class="notif-date">{{ formatDate(notif.createdAt) }}</div>
+        <div class="notif-date">通知日期 {{ formatDate(notif.createdAt) }}</div>
       </div>
     </div>
     

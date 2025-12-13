@@ -22,7 +22,7 @@
         >
           <div class="notification-content">
             <p class="notification-title">{{ notification.title }}</p>
-            <p class="notification-message">{{ notification.message }}</p>
+            <p class="notification-message">{{ notification.content }}</p>
             <span class="notification-time">{{ formatTime(notification.createdAt) }}</span>
           </div>
           <i v-if="!notification.isRead" class="fa-solid fa-circle unread-dot"></i>
