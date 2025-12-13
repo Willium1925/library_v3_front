@@ -661,12 +661,19 @@ const initEditForm = async () => {
     formData.value.tagIds = []
   }
   
-  // 5. 系列
-  if (data.seriesTitle) {
-    const series = seriesList.value.find(s => s.seriesTitle === data.seriesTitle)
+  // 5. 系列和代表作
+  if (data.seriesTitle && data.seriesId) {
+    // 優先使用 seriesId（如果後端有提供）
+    formData.value.seriesId = data.seriesId
+    formData.value.representative = data.representative === true
+  } else if (data.seriesTitle) {
+    // 回退：透過名稱查找
+    const series = seriesList.value.find(s => s.title === data.seriesTitle)
     formData.value.seriesId = series ? series.id : null
+    formData.value.representative = data.representative === true
   } else {
     formData.value.seriesId = null
+    formData.value.representative = false
   }
   
   // 6. 副本

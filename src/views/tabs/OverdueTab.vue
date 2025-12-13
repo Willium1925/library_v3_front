@@ -5,7 +5,7 @@
     <div v-if="!loading && overdueLoans.length > 0" class="overdue-list">
       <BookListCard
         v-for="loan in overdueLoans"
-        :key="loan.id"
+        :key="loan.bookId"
         :book="loan"
         :is-overdue="true"
       >

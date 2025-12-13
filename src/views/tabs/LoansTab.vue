@@ -5,7 +5,7 @@
     <div v-if="!loading && loans.length > 0" class="loans-list">
       <BookListCard
         v-for="loan in loans"
-        :key="loan.id"
+        :key="loan.bookId"
         :book="loan"
       >
         <template #meta>
@@ -13,7 +13,7 @@
           <div class="card-meta" style="color:var(--primary); font-weight:700;">到期日期：{{ formatDate(loan.dueDate) }}</div>
         </template>
         <template #status>
-          <button class="btn btn-sm" @click="handleRenew(loan.id)">續借</button>
+          <button class="btn btn-sm" @click="handleRenew(loan.loanId)">續借</button>
         </template>
       </BookListCard>
     </div>
