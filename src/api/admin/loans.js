@@ -7,8 +7,8 @@ export const adminLoansAPI = {
   },
 
   // 還書
-  return(data) {
-    return apiClient.post('/loans/return', data)
+  returnBook(uniqueCode) {
+    return apiClient.post('/loans/return', { uniqueCode })
   }
 }
 export default adminLoansAPI

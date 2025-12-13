@@ -30,17 +30,29 @@
       <div class="user-info-grid">
         <div class="info-item">
           <span class="label">姓名：</span>
-          <span class="value">{{ userInfo.name || '未知' }}</span>
+          <span class="value">{{ userInfo.name }}</span>
         </div>
         <div class="info-item">
           <span class="label">借書證號：</span>
-          <span class="value">{{ userInfo.cardId || '未知' }}</span>
+          <span class="value">{{ userInfo.cardId }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">狀態：</span>
+          <span class="value">{{ formatStatus(userInfo.status) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">身份：</span>
+          <span class="value">{{ formatRole(userInfo.role) }}</span>
         </div>
         <div class="info-item">
           <span class="label">罰分：</span>
-          <span class="value" :class="{ 'text-danger': (userInfo.penaltyPoints || 0) >= 10 }">
-            {{ userInfo.penaltyPoints || 0 }} 分
+          <span class="value" :class="{ 'text-danger': userInfo.penaltyPoints >= 10 }">
+            {{ userInfo.penaltyPoints }} 分
           </span>
+        </div>
+        <div class="info-item">
+          <span class="label">借閱數量：</span>
+          <span class="value">{{ userInfo.currentLoanCount }} / {{ userInfo.maxLoanCount }}</span>
         </div>
       </div>
     </div>
@@ -96,24 +108,26 @@ const handleReturn = async () => {
 
     alert('還書成功！')
     
+    // 設定會員資訊（從還書回應中直接取得）
+    userInfo.value = {
+      name: response.borrowerName,
+      cardId: response.borrowerCardId,
+      status: response.borrowerStatus,
+      role: response.borrowerRole,
+      penaltyPoints: response.borrowerPenaltyPoints,
+      currentLoanCount: response.currentLoanCount,
+      maxLoanCount: response.maxLoanCount
+    }
+    
     // 將成功歸還的書籍加入清單
     returnList.value.push({
       uniqueCode: uniqueCode.value,
       returnTime: new Date().toISOString(),
       status: '已歸還',
-      bookTitle: response.bookTitle || '未知書名',
+      bookTitle: response.bookTitle,
       loanDate: response.loanDate,
       dueDate: response.dueDate
     })
-    
-    // 顯示會員資訊（歸還後的狀態）
-    if (response.borrowerCardId) {
-      try {
-        userInfo.value = await adminUsersAPI.getUserByCardId(response.borrowerCardId)
-      } catch (err) {
-        console.error('獲取會員資訊失敗:', err)
-      }
-    }
     
     uniqueCode.value = ''
   } catch (error) {
@@ -121,6 +135,24 @@ const handleReturn = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const formatStatus = (status) => {
+  const statusMap = {
+    'PENDING': '待啟用',
+    'ACTIVE': '正常',
+    'SUSPENDED': '停權中'
+  }
+  return statusMap[status] || status
+}
+
+const formatRole = (role) => {
+  const roleMap = {
+    'ROLE_USER': '一般會員',
+    'ROLE_CITIZEN': '台中市民',
+    'ROLE_ADMIN': '管理員'
+  }
+  return roleMap[role] || role
 }
 
 const formatDate = (dateStr) => {
@@ -220,6 +252,12 @@ const formatDateTime = (dateStr) => {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .user-info-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .info-item {

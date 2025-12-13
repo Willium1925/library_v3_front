@@ -30,6 +30,14 @@
       <div class="filter-row">
         <input v-model="filters.isbn" placeholder="ISBN" />
         <input v-model="filters.publishYear" placeholder="出版年份" type="number" />
+        <select v-model="sortBy">
+          <option value="id,asc">ID 升序</option>
+          <option value="id,desc">ID 降序</option>
+          <option value="addedDate,desc">最新上架</option>
+          <option value="addedDate,asc">最早上架</option>
+          <option value="totalLoanCount,desc">借閱次數最多</option>
+          <option value="totalLoanCount,asc">借閱次數最少</option>
+        </select>
         <div class="filter-actions">
           <button class="btn btn-secondary" @click="clearFilters">清除篩選</button>
           <button class="btn btn-primary" @click="search">執行搜尋</button>
@@ -91,6 +99,46 @@
       </table>
     </div>
 
+    <!-- 分頁控制 -->
+    <div v-if="!loading && pagination.totalPages > 0" class="pagination">
+      <div class="pagination-info">
+        顯示第 {{ pagination.currentPage * pagination.pageSize + 1 }} - 
+        {{ Math.min((pagination.currentPage + 1) * pagination.pageSize, pagination.totalElements) }} 項，
+        共 {{ pagination.totalElements }} 項
+      </div>
+      <div class="pagination-controls">
+        <button 
+          class="btn btn-secondary" 
+          @click="goToPage(0)" 
+          :disabled="pagination.currentPage === 0"
+        >
+          首頁
+        </button>
+        <button 
+          class="btn btn-secondary" 
+          @click="goToPage(pagination.currentPage - 1)" 
+          :disabled="pagination.currentPage === 0"
+        >
+          上一頁
+        </button>
+        <span class="page-number">第 {{ pagination.currentPage + 1 }} / {{ pagination.totalPages }} 頁</span>
+        <button 
+          class="btn btn-secondary" 
+          @click="goToPage(pagination.currentPage + 1)" 
+          :disabled="pagination.currentPage >= pagination.totalPages - 1"
+        >
+          下一頁
+        </button>
+        <button 
+          class="btn btn-secondary" 
+          @click="goToPage(pagination.totalPages - 1)" 
+          :disabled="pagination.currentPage >= pagination.totalPages - 1"
+        >
+          末頁
+        </button>
+      </div>
+    </div>
+
     <!-- 副本列表（條件顯示） -->
     <div v-if="selectedBook && copies.length > 0" class="copies-section">
       <h3>{{ selectedBook.title }} - 副本列表</h3>
@@ -137,7 +185,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import adminBooksAPI from '../../api/admin/books'
 import { categoriesAPI } from '../../api/categories'
@@ -166,6 +214,14 @@ const filters = ref({
   publishYear: null
 })
 
+const sortBy = ref('id,asc')
+const pagination = reactive({
+  currentPage: 0,
+  pageSize: 10,
+  totalPages: 0,
+  totalElements: 0
+})
+
 const currentSubCategories = computed(() => {
   if (!filters.value.mainCategoryId) return []
   const mainCat = mainCategories.value.find(c => c.id === filters.value.mainCategoryId)
@@ -185,16 +241,48 @@ const loadCategories = async () => {
   }
 }
 
-const search = async () => {
+const search = async (page = 0) => {
   try {
     loading.value = true
-    const response = await adminBooksAPI.search(filters.value)
+    const [sortField, sortDirection] = sortBy.value.split(',')
+    
+    const params = {
+      ...filters.value,
+      page,
+      size: pagination.pageSize,
+      sort: `${sortField},${sortDirection}`
+    }
+    
+    console.log('搜尋參數:', params)
+    
+    const response = await adminBooksAPI.search(params)
     books.value = response.bookPage.content || []
-    console.log(response)
+    
+    console.log('後端回傳分頁資訊:', {
+      currentPage: response.bookPage.currentPage,
+      pageSize: response.bookPage.pageSize,
+      totalPages: response.bookPage.totalPages,
+      totalElements: response.bookPage.totalElements
+    })
+    
+    // 使用 reactive 對象直接更新（注意：後端是 currentPage 和 pageSize，不是 number 和 size）
+    pagination.currentPage = response.bookPage.currentPage ?? 0
+    pagination.pageSize = response.bookPage.pageSize ?? 10
+    pagination.totalPages = response.bookPage.totalPages ?? 0
+    pagination.totalElements = response.bookPage.totalElements ?? 0
+    
+    console.log('更新後的 pagination:', JSON.parse(JSON.stringify(pagination)))
   } catch (error) {
     alert('搜尋失敗：' + error)
   } finally {
     loading.value = false
+  }
+}
+
+const goToPage = (page) => {
+  console.log('goToPage 被調用，目標頁:', page, '當前頁:', pagination.currentPage)
+  if (page >= 0 && page < pagination.totalPages) {
+    search(page)
   }
 }
 
@@ -421,6 +509,33 @@ onMounted(() => {
   text-align: center;
   border-radius: 8px;
   color: #6b7280;
+}
+
+.pagination {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pagination-info {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.page-number {
+  padding: 0 16px;
+  font-weight: 500;
+  color: #374151;
 }
 </style>
 
