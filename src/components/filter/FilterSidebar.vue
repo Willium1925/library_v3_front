@@ -90,11 +90,11 @@ const props = defineProps({
 const emit = defineEmits(['filter-change'])
 
 const filters = reactive({
-  mainCategoryId: props.initialFilters.mainCategoryId || null,
-  subCategoryId: props.initialFilters.subCategoryId || null,
-  authorId: props.initialFilters.authorId || null,
-  publisherId: props.initialFilters.publisherId || null,
-  tags: props.initialFilters.tags || []
+  mainCategoryId: null,
+  subCategoryId: null,
+  authorId: null,
+  publisherId: null,
+  tags: []
 })
 
 const hasActiveFilters = computed(() => {
@@ -118,13 +118,24 @@ const clearAllFilters = () => {
   handleFilterChange()
 }
 
-// 當主分類改變時，清除子分類選擇
-watch(() => filters.mainCategoryId, (newVal, oldVal) => {
-  if (newVal !== oldVal && oldVal !== undefined) {
-    filters.subCategoryId = null
-    handleFilterChange()
-  }
-})
+// 同步 initialFilters 的變化（當 URL 改變時）
+watch(() => props.initialFilters, (newFilters) => {
+  filters.mainCategoryId = newFilters.mainCategoryId || null
+  filters.subCategoryId = newFilters.subCategoryId || null
+  filters.authorId = newFilters.authorId || null
+  filters.publisherId = newFilters.publisherId || null
+  filters.tags = newFilters.tags || []
+}, { deep: true, immediate: true })
+
+// 當主分類改變時，清除子分類選擇（僅當使用者主動選擇主分類時）
+// 註解掉這個 watch，改由 SearchPage 處理邏輯
+// watch(() => filters.mainCategoryId, (newVal, oldVal) => {
+//   if (newVal !== oldVal && oldVal !== undefined) {
+//     filters.subCategoryId = null
+//     handleFilterChange()
+//   }
+// })
+
 </script>
 
 <style scoped>

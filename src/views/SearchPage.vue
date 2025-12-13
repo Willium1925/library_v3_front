@@ -161,7 +161,7 @@ const formattedMainCategories = computed(() => {
 
 // 格式化子分類（根據選中的主分類過濾）
 const formattedSubCategories = computed(() => {
-  let subCats = filterOptions.allSubCategories
+  let subCats = []
   
   // 如果選擇了主分類，只顯示該主分類下的子分類
   if (filters.mainCategoryId) {
@@ -169,12 +169,16 @@ const formattedSubCategories = computed(() => {
       cat => cat.id === filters.mainCategoryId
     )
     subCats = selectedMainCat?.categorySubs || []
+  } 
+  // 如果沒有選擇主分類，顯示所有子分類
+  else {
+    subCats = filterOptions.allSubCategories
   }
   
   return subCats.map(sub => ({
     id: sub.id,
-    name: sub.categorySubTitle || sub.categorySubTitle,
-    count: sub.count
+    name: sub.categorySubTitle || sub.title,
+    count: sub.count || 0
   }))
 })
 
@@ -223,7 +227,30 @@ const visiblePages = computed(() => {
 })
 
 const handleFilterChange = (newFilters) => {
+  // 記錄舊的主分類值
+  const oldMainCategoryId = filters.mainCategoryId
+  
+  // 如果選擇了子分類但沒有主分類，自動查找並設置主分類
+  if (newFilters.subCategoryId && !newFilters.mainCategoryId) {
+    for (const mainCat of filterOptions.mainCategories) {
+      const foundSub = (mainCat.categorySubs || []).find(sub => sub.id === newFilters.subCategoryId)
+      if (foundSub) {
+        newFilters.mainCategoryId = mainCat.id
+        break
+      }
+    }
+  }
+  
+  // 如果使用者直接點擊主分類（不是反向設置），清除子分類
+  if (newFilters.mainCategoryId !== oldMainCategoryId && 
+      newFilters.mainCategoryId && 
+      !newFilters.subCategoryId) {
+    // 使用者直接選擇主分類，清除子分類
+    newFilters.subCategoryId = null
+  }
+  
   Object.assign(filters, newFilters)
+  pagination.currentPage = 0  // 重置到第一頁
   updateURL()
   searchBooks()
 }
@@ -361,12 +388,23 @@ const updateFilterOptionsFromStats = (stats) => {
     }))
   }
   
-  // 更新子分類的 count
+  // 更新子分類的 count - 關鍵修正：直接更新主分類下的子分類
   if (stats.subCategories && stats.subCategories.length > 0) {
     const subCatCountMap = new Map(stats.subCategories.map(s => [s.id, s.count]))
+    
+    // 更新 allSubCategories
     filterOptions.allSubCategories = filterOptions.allSubCategories.map(sub => ({
       ...sub,
       count: subCatCountMap.get(sub.id) || 0
+    }))
+    
+    // 更新主分類內的 categorySubs（保持引用更新）
+    filterOptions.mainCategories = filterOptions.mainCategories.map(mainCat => ({
+      ...mainCat,
+      categorySubs: (mainCat.categorySubs || []).map(sub => ({
+        ...sub,
+        count: subCatCountMap.get(sub.id) || 0
+      }))
     }))
   }
 }
