@@ -35,7 +35,7 @@ export const useNotificationStore = defineStore('notifications', () => {
       // 更新本地狀態
       const notification = notifications.value.find(n => n.id === notificationId)
       if (notification) {
-        notification.isRead = true
+        notification.read = true  // 修正：改為 read
       }
       // 更新未讀數量
       if (unreadCount.value > 0) {
@@ -51,7 +51,7 @@ export const useNotificationStore = defineStore('notifications', () => {
     try {
       await notificationsAPI.markAllAsRead()
       // 更新本地狀態
-      notifications.value.forEach(n => n.isRead = true)
+      notifications.value.forEach(n => n.read = true)  // 修正：改為 read
       unreadCount.value = 0
     } catch (error) {
       console.error('標記全部已讀失敗:', error)

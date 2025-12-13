@@ -1,31 +1,29 @@
 import apiClient from './index'
 
-export const reviewsAPI = {
+export default {
   /**
-   * 獲取書籍的評論列表
-   * @param {number} bookId - 書籍ID
-   * @param {Object} params - 分頁參數
+   * 獲取書籍評論列表
+   * @param {number} bookId 
+   * @param {object} params { page, size, sort }
    */
-  getByBookId(bookId, params = {}) {
+  getReviews(bookId, params) {
     return apiClient.get(`/books/${bookId}/reviews`, { params })
   },
 
   /**
    * 新增評論
-   * @param {number} bookId - 書籍ID
-   * @param {Object} data
-   * @param {number} data.rating - 評分（1-5）
-   * @param {string} data.reviewText - 評論內容
+   * @param {number} bookId 
+   * @param {object} data { rating, reviewText }
    */
   addReview(bookId, data) {
     return apiClient.post(`/books/${bookId}/reviews`, data)
   },
 
   /**
-   * 更新評論
-   * @param {number} bookId - 書籍ID
-   * @param {number} reviewId - 評論ID
-   * @param {Object} data
+   * 編輯評論
+   * @param {number} bookId 
+   * @param {number} reviewId 
+   * @param {object} data { rating, reviewText }
    */
   updateReview(bookId, reviewId, data) {
     return apiClient.put(`/books/${bookId}/reviews/${reviewId}`, data)
@@ -33,29 +31,28 @@ export const reviewsAPI = {
 
   /**
    * 刪除評論
-   * @param {number} bookId - 書籍ID
-   * @param {number} reviewId - 評論ID
+   * @param {number} bookId 
+   * @param {number} reviewId 
    */
   deleteReview(bookId, reviewId) {
     return apiClient.delete(`/books/${bookId}/reviews/${reviewId}`)
   },
 
   /**
-   * 對評論按讚
-   * @param {number} bookId - 書籍ID
-   * @param {number} reviewId - 評論ID
+   * Toggle 按讚（按過就取消，沒按過就新增）
+   * @param {number} bookId 
+   * @param {number} reviewId 
    */
-  likeReview(bookId, reviewId) {
+  toggleLike(bookId, reviewId) {
     return apiClient.post(`/books/${bookId}/reviews/${reviewId}/like`)
   },
 
   /**
-   * 取消對評論的讚
-   * @param {number} bookId - 書籍ID
-   * @param {number} reviewId - 評論ID
+   * 取消按讚（舊版 API，保留以防萬一）
+   * @param {number} bookId 
+   * @param {number} reviewId 
    */
   unlikeReview(bookId, reviewId) {
     return apiClient.delete(`/books/${bookId}/reviews/${reviewId}/like`)
   }
 }
-

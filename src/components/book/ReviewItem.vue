@@ -34,13 +34,14 @@
     
     <div class="review-footer">
       <button
+        v-if="authStore.isAuthenticated"
         class="like-btn"
-        :class="{ liked: review.userLiked }"
+        :class="{ liked: review.likedByCurrentUser }"
         @click="handleLike"
         style="margin-left: auto;"
         aria-label="like button"
       >
-        <i :class="review.userLiked ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
+        <i :class="review.likedByCurrentUser ? 'fa-solid fa-thumbs-up' : 'fa-regular fa-thumbs-up'"></i>
         {{ review.likesCount }}
       </button>
     </div>
@@ -212,13 +213,13 @@ const handleDelete = () => {
 
 .like-btn:hover {
   background: #f9f9f9;
-  border-color: var(--accent);
+  border-color: #ffa500;
 }
 
 .like-btn.liked {
-  background: #ffe0e0;
-  border-color: var(--accent);
-  color: var(--accent);
+  background: #ffa500;
+  border-color: #ffa500;
+  color: #fff;
 }
 
 .like-btn i {

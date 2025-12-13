@@ -56,7 +56,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
-import { reviewsAPI } from '../../api/reviews'
+import reviewsAPI from '../../api/reviews'
 import ReviewItem from './ReviewItem.vue'
 
 const props = defineProps({
@@ -80,13 +80,17 @@ const formData = reactive({
 
 const fetchReviews = async () => {
   try {
-    const res = await reviewsAPI.getByBookId(props.bookId)
-    // 支援 axios 回傳的 res.data 或直接回傳陣列/物件
-    const data = res?.data ?? res
-    // 如果是分頁物件，取 content；否則嘗試直接使用陣列
-    reviews.value = Array.isArray(data)
-        ? data
-        : (data.content ?? [])
+    const res = await reviewsAPI.getReviews(props.bookId, { page: 0, size: 100 })
+    
+    // 處理分頁物件返回格式
+    if (res && res.content) {
+      reviews.value = res.content
+    } else if (Array.isArray(res)) {
+      reviews.value = res
+    } else {
+      console.warn('未預期的評論數據格式:', res)
+      reviews.value = []
+    }
   } catch (error) {
     console.error('獲取評論失敗:', error)
     reviews.value = []
@@ -102,11 +106,12 @@ const handleSubmit = async () => {
   try {
     if (editingReview.value) {
       await reviewsAPI.updateReview(props.bookId, editingReview.value.id, formData)
+      alert('評論更新成功！')
     } else {
       await reviewsAPI.addReview(props.bookId, formData)
+      alert('評論發表成功！')
     }
     
-    alert('評論成功！')
     showReviewForm.value = false
     editingReview.value = null
     formData.rating = 5
@@ -114,7 +119,7 @@ const handleSubmit = async () => {
     
     await fetchReviews()
   } catch (error) {
-    alert('評論失敗：' + error)
+    alert('操作失敗：' + error.message)
   }
 }
 
@@ -126,16 +131,47 @@ const handleCancel = () => {
 }
 
 const handleLike = async (reviewId) => {
+  if (!isAuthenticated.value) {
+    alert('請先登入')
+    return
+  }
+  
+  const review = reviews.value.find(r => r.id === reviewId)
+  if (!review) return
+  
+  const wasLiked = review.likedByCurrentUser
+  const oldCount = review.likesCount
+  
   try {
-    const review = reviews.value.find(r => r.id === reviewId)
-    if (review.userLiked) {
-      await reviewsAPI.unlikeReview(props.bookId, reviewId)
-    } else {
-      await reviewsAPI.likeReview(props.bookId, reviewId)
+    console.log('👍 按讚前:', { reviewId, wasLiked, oldCount })
+    
+    // 樂觀 UI 更新（先更新 UI，如果失敗再回滾）
+    review.likedByCurrentUser = !wasLiked
+    review.likesCount = wasLiked ? oldCount - 1 : oldCount + 1
+    
+    // 執行 toggle 操作
+    const result = await reviewsAPI.toggleLike(props.bookId, reviewId)
+    
+    console.log('👍 API 返回:', result)
+    
+    // 確認 API 返回的狀態與 UI 一致
+    if (result.liked !== review.likedByCurrentUser) {
+      console.warn('⚠️ API 返回狀態與預期不一致，修正中...')
+      review.likedByCurrentUser = result.liked
+      review.likesCount = result.liked ? oldCount + 1 : oldCount - 1
     }
-    await fetchReviews()
+    
+    console.log('👍 更新後:', { likedByCurrentUser: review.likedByCurrentUser, likesCount: review.likesCount })
   } catch (error) {
-    console.error('按讚失敗:', error)
+    console.error('❌ 按讚錯誤:', error)
+    
+    // 回滾 UI
+    review.likedByCurrentUser = wasLiked
+    review.likesCount = oldCount
+    
+    // 顯示後端的自定義錯誤訊息
+    const errorMsg = typeof error === 'string' ? error : (error.message || '操作失敗')
+    alert(errorMsg)
   }
 }
 
@@ -152,7 +188,7 @@ const handleDeleteReview = async (reviewId) => {
     alert('刪除成功')
     await fetchReviews()
   } catch (error) {
-    alert('刪除失敗：' + error)
+    alert('刪除失敗：' + error.message)
   }
 }
 

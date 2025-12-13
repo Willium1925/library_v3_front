@@ -7,12 +7,12 @@
         v-for="notif in notifications"
         :key="notif.id"
         class="notif-item"
-        :class="{ unread: !notif.isRead }"
+        :class="{ unread: !notif.read }"
         @click="handleNotificationClick(notif)"
       >
         <div>
           <div class="notif-title">
-            <span v-if="!notif.isRead" class="badge-dot"></span>
+            <span v-if="!notif.read" class="badge-dot"></span>
             {{ notif.title }}
           </div>
           <div class="notif-content">{{ notif.content }}</div>
@@ -50,7 +50,7 @@ const formatDate = (dateString) => {
 }
 
 const handleNotificationClick = async (notif) => {
-  if (!notif.isRead) {
+  if (!notif.read) {
     await notificationStore.markAsRead(notif.id)
   }
 }
