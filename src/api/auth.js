@@ -34,6 +34,14 @@ export const authAPI = {
   },
 
   /**
+   * 更新使用者資料
+   * @param {Object} data - 使用者資料
+   */
+  updateUserProfile(data) {
+    return apiClient.put('/users/me/profile', data)
+  },
+
+  /**
    * 驗證舊密碼
    * @param {string} oldPassword
    */

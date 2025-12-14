@@ -29,7 +29,7 @@
       </div>
       
       <div class="profile-actions">
-        <button class="btn" @click="handleEditProfile">編輯資料</button>
+        <button class="btn" @click="showEditProfileModal = true">編輯資料</button>
         <button class="btn btn-outline-danger" @click="showChangePasswordModal = true">更改密碼</button>
       </div>
     </div>
@@ -39,6 +39,13 @@
       @close="showChangePasswordModal = false"
       @success="handlePasswordChanged"
     />
+
+    <EditProfileModal
+      v-if="showEditProfileModal"
+      :user="user"
+      @close="showEditProfileModal = false"
+      @success="showEditProfileModal = false"
+    />
   </div>
 </template>
 
@@ -46,11 +53,13 @@
 import { ref, computed } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import ChangePasswordModal from '../../components/ChangePasswordModal.vue'
+import EditProfileModal from '../../components/EditProfileModal.vue'
 
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
 
 const showChangePasswordModal = ref(false)
+const showEditProfileModal = ref(false)
 
 const getRoleText = (role) => {
   const roleMap = {
@@ -59,10 +68,6 @@ const getRoleText = (role) => {
     'ROLE_ADMIN': '管理員'
   }
   return roleMap[role] || role
-}
-
-const handleEditProfile = () => {
-  alert('編輯資料功能開發中')
 }
 
 const handlePasswordChanged = () => {

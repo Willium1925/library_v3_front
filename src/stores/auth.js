@@ -34,6 +34,16 @@ export const useAuthStore = defineStore('auth', () => {
     const isCitizen = computed(() => userRole.value === 'ROLE_CITIZEN')
 
     // Actions
+    function _setTokenAndUser(userData) {
+        // Check if new token exists and update
+        if (userData && userData.jwtToken) {
+            token.value = userData.jwtToken;
+            localStorage.setItem('token', userData.jwtToken);
+        }
+        // Update user state
+        user.value = userData;
+    }
+
     async function login(credentials) {
         try {
             const response = await authAPI.login(credentials)
@@ -68,12 +78,16 @@ export const useAuthStore = defineStore('auth', () => {
   }
   
   async function fetchUserProfile() {
+    if (!token.value) return;
     try {
       const userData = await authAPI.getCurrentUser()
       user.value = userData
       return userData
     } catch (error) {
       console.error('獲取使用者資料失敗:', error)
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        logout();
+      }
       throw error
     }
   }
@@ -100,7 +114,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     fetchUserProfile,
-    initialize
+    initialize,
+    _setTokenAndUser // Expose the new action
   }
 })
-
