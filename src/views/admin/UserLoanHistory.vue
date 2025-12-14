@@ -1,10 +1,6 @@
 <template>
   <div class="history-page">
     <div class="page-header">
-      <button class="btn btn-secondary" @click="goBack">
-        <i class="fa-solid fa-arrow-left"></i>
-        返回
-      </button>
       <h2 class="page-title">會員借閱記錄</h2>
     </div>
 
@@ -39,29 +35,36 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import adminUsersAPI from '../../api/admin/users'
 
-const route = useRoute()
-const router = useRouter()
+// Accept an optional userId prop so this component can be embedded via import
+const props = defineProps({
+  userId: { type: [String, Number], default: null }
+})
 
-const userId = route.params.userId
+const route = useRoute()
+
+// Use the provided prop when embedding; otherwise fall back to route param
+const resolvedUserId = props.userId ?? route.params.userId
+
 const loading = ref(false)
 const loans = ref([])
 
 const loadLoans = async () => {
+  if (!resolvedUserId) {
+    loans.value = []
+    return
+  }
+
   try {
     loading.value = true
-    loans.value = await adminUsersAPI.getLoans(userId)
+    loans.value = await adminUsersAPI.getLoans(resolvedUserId)
   } catch (error) {
     alert('查詢失敗：' + error)
   } finally {
     loading.value = false
   }
-}
-
-const goBack = () => {
-  router.back()
 }
 
 const formatDate = (date) => {
@@ -143,4 +146,3 @@ onMounted(() => {
   color: #6b7280;
 }
 </style>
-

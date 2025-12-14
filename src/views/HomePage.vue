@@ -4,7 +4,7 @@
     
     <!-- Hero Banner -->
     <section class="hero">
-      <div class="hero-text">歡迎來到圖書館系統</div>
+      <div class="hero-text">歡迎來到日比野圖書館三世</div>
     </section>
     
     <!-- Category Navigation -->
@@ -43,7 +43,7 @@
           <span class="section-subtitle">最新上架</span>
         </h2>
         <router-link to="/search?sort=addedDate,desc" class="section-more">
-          查看更多
+          查看所有
         </router-link>
       </div>
       <BookGrid v-if="!loading.latest" :books="latestBooks" :columns="5" />
@@ -58,7 +58,7 @@
           <span class="section-subtitle">熱門借閱</span>
         </h2>
         <router-link to="/search?sort=totalLoanCount,desc" class="section-more">
-          查看排行榜
+          查看所有
         </router-link>
       </div>
       <BookGrid v-if="!loading.popular" :books="popularBooks" :columns="5" />

@@ -139,6 +139,8 @@
       </div>
     </div>
 
+    <br>
+
     <!-- 副本列表（條件顯示） -->
     <div v-if="selectedBook && copies.length > 0" class="copies-section">
       <h3>{{ selectedBook.title }} - 副本列表</h3>

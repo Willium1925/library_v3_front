@@ -10,8 +10,8 @@
         class="history-card"
       >
         <template #meta>
-          <div class="card-meta">書籍碼：{{ record.copyUniqueCode }}</div>
-          <div class="card-meta">借閱：{{ formatDate(record.loanDate) }}｜到期：{{ formatDate(record.dueDate) }}</div>
+          <div class="card-meta">借閱：{{ formatDate(record.loanDate) }} </div>
+          <div class="card-meta">到期：{{ formatDate(record.dueDate) }}</div>
           <div class="card-meta">歸還：{{ formatDate(record.returnDate) }}</div>
         </template>
         <template #status>
@@ -104,6 +104,12 @@ onMounted(() => {
   font-size: 50px;
   margin-bottom: 15px;
   opacity: 0.5;
+}
+
+.card-meta {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 4px;
 }
 
 @keyframes fadeIn {

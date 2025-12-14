@@ -18,12 +18,12 @@
           :class="[
             'status-badge',
             {
-              'status-available': book.availableCount > 0,
-              'status-unavailable': book.availableCount === 0
+              'status-available': book.availableCopies > 0,
+              'status-unavailable': book.availableCopies === 0
             }
           ]"
         >
-          {{ book.availableCount > 0 ? `可借 ${book.availableCount} 本` : '全部借出' }}
+          {{ book.availableCopies > 0 ? `尚餘 ${book.availableCopies} 本` : '全部借出' }}
         </span>
       </div>
     </div>
@@ -122,7 +122,7 @@ const goToDetail = () => {
 }
 
 .book-card__status {
-  margin-top: 10px;
+  text-align: right;
 }
 
 .status-badge {
@@ -134,8 +134,10 @@ const goToDetail = () => {
 }
 
 .status-available {
-  background: var(--success);
+  background: #059669;
   color: #fff;
+  opacity: 0.75;
+
 }
 
 .status-unavailable {

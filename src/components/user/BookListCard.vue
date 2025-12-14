@@ -8,7 +8,7 @@
     </div>
     <div class="card-info">
       <div class="card-title">{{ book.title }}</div>
-      <div class="card-meta">作者：{{ book.author }}</div>
+      <div class="card-meta">作者：{{ Array.isArray(book.authors) ? book.authors.join('、') : (book.author || book.authors || '未知') }}</div>
       <div class="card-meta">書籍碼：{{ book.uniqueCode }}</div>
       <slot name="meta"></slot>
     </div>

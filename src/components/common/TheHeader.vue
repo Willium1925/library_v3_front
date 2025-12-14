@@ -1,6 +1,6 @@
 <template>
   <header class="header">
-    <router-link to="/" class="header__logo">圖書館系統</router-link>
+    <router-link to="/" class="header__logo">日比野圖書館三世</router-link>
     
     <div class="header__search">
       <form @submit.prevent="handleSearch">

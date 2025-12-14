@@ -1,10 +1,6 @@
 <template>
   <div class="history-page">
     <div class="page-header">
-      <button class="btn btn-secondary" @click="goBack">
-        <i class="fa-solid fa-arrow-left"></i>
-        返回
-      </button>
       <h2 class="page-title">會員預約記錄</h2>
     </div>
 
@@ -26,7 +22,7 @@
         </thead>
         <tbody>
           <tr v-for="res in reservations" :key="res.id">
-            <td>{{ res.bookTitle }}</td>
+            <td>{{ res.title }}</td>
             <td>{{ res.uniqueCode }}</td>
             <td>{{ formatDate(res.reserveDate) }}</td>
             <td>{{ formatDate(res.notifyDate) }}</td>
@@ -43,29 +39,34 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import adminUsersAPI from '../../api/admin/users'
 
-const route = useRoute()
-const router = useRouter()
+const props = defineProps({
+  userId: { type: [String, Number], default: null }
+})
 
-const userId = route.params.userId
+const route = useRoute()
+
+const resolvedUserId = props.userId ?? route.params.userId
+
 const loading = ref(false)
 const reservations = ref([])
 
 const loadReservations = async () => {
+  if (!resolvedUserId) {
+    reservations.value = []
+    return
+  }
+
   try {
     loading.value = true
-    reservations.value = await adminUsersAPI.getReservations(userId)
+    reservations.value = await adminUsersAPI.getReservations(resolvedUserId)
   } catch (error) {
     alert('查詢失敗：' + error)
   } finally {
     loading.value = false
   }
-}
-
-const goBack = () => {
-  router.back()
 }
 
 const formatDate = (date) => {
@@ -147,4 +148,3 @@ onMounted(() => {
   color: #6b7280;
 }
 </style>
-

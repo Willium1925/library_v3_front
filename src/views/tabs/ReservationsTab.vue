@@ -5,12 +5,12 @@
     <div v-if="!loading && reservations.length > 0" class="reservations-list">
       <BookListCard
         v-for="reservation in reservations"
-        :key="reservation.id"
+        :key="reservation.bookId"
         :book="reservation"
       >
         <template #meta>
-          <div class="card-meta">書籍碼：{{ reservation.copyUniqueCode }}</div>
-          <div class="card-meta">預約日期：{{ formatDate(reservation.reservedAt) }}</div>
+          <div class="card-meta">預約日期：{{ formatDate(reservation.reserveDate) }}</div>
+          <div class="card-meta" style="color:var(--primary); font-weight:700;">通知日期：{{ formatDate(reservation.notifyDate) }}</div>
         </template>
         <template #status>
           <span v-if="reservation.status === 'AVAILABLE'" class="status-pill ready">可取書</span>
@@ -122,6 +122,12 @@ onMounted(() => {
   font-size: 50px;
   margin-bottom: 15px;
   opacity: 0.5;
+}
+
+.card-meta {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 4px;
 }
 
 @keyframes fadeIn {

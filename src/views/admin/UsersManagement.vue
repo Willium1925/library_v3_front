@@ -64,8 +64,29 @@
         <button v-if="selectedUser.status === 'PENDING'" class="btn btn-success" @click="activateUser">開通帳號</button>
         <button v-if="selectedUser.status === 'ACTIVE'" class="btn btn-warning" @click="suspendUser">停權</button>
         <button v-if="selectedUser.status === 'SUSPENDED'" class="btn btn-success" @click="restoreUser">復權</button>
-        <button class="btn btn-secondary" @click="viewUserLoans">顯示借閱記錄</button>
-        <button class="btn btn-secondary" @click="viewUserReservations">顯示預約記錄</button>
+        <button
+          class="btn btn-secondary"
+          :class="{ 'btn-active': showLoans }"
+          @click="toggleLoans"
+        >
+          顯示借閱記錄
+        </button>
+        <button
+          class="btn btn-secondary"
+          :class="{ 'btn-active': showReservations }"
+          @click="toggleReservations"
+        >
+          顯示預約記錄
+        </button>
+      </div>
+
+      <!-- Embedded loan and reservation components -->
+      <div v-if="showLoans" class="embedded-section">
+        <UserLoanHistory :userId="selectedUser.id" />
+      </div>
+
+      <div v-if="showReservations" class="embedded-section">
+        <UserReservationHistory :userId="selectedUser.id" />
       </div>
     </div>
   </div>
@@ -75,6 +96,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import adminUsersAPI from '../../api/admin/users'
+import UserLoanHistory from './UserLoanHistory.vue'
+import UserReservationHistory from './UserReservationHistory.vue'
 
 const router = useRouter()
 
@@ -91,10 +114,17 @@ const searched = ref(false) // 用於追蹤是否執行過搜尋
 const users = ref([]) // 用於儲存搜尋結果列表
 const selectedUser = ref(null) // 用於儲存當前選擇的用戶
 
+// New toggles for embedded views
+const showLoans = ref(false)
+const showReservations = ref(false)
+
 const handleSearch = async () => {
   isLoading.value = true
   searched.value = true
   selectedUser.value = null // 每次搜尋時清空已選中的用戶
+  // hide embedded panels when searching
+  showLoans.value = false
+  showReservations.value = false
   try {
     users.value = await adminUsersAPI.search(search.value)
     if (users.value.length === 0) {
@@ -110,6 +140,9 @@ const handleSearch = async () => {
 
 const selectUser = (user) => {
   selectedUser.value = user
+  // reset panels when selecting a new user
+  showLoans.value = false
+  showReservations.value = false
 }
 
 const updateUserStatus = async (apiCall, successMessage) => {
@@ -134,12 +167,16 @@ const activateUser = () => updateUserStatus(adminUsersAPI.activate, '開通成�
 const suspendUser = () => updateUserStatus(adminUsersAPI.suspend, '停權成功')
 const restoreUser = () => updateUserStatus(adminUsersAPI.restore, '復權成功')
 
-const viewUserLoans = () => {
-  window.open(`/admin/user/${selectedUser.value.id}/loans`, '_blank')
+// Replaced window.open with toggles that show embedded components
+const toggleLoans = () => {
+  showLoans.value = !showLoans.value
+  // ensure only one panel visible at a time (optional)
+  if (showLoans.value) showReservations.value = false
 }
 
-const viewUserReservations = () => {
-  window.open(`/admin/user/${selectedUser.value.id}/reservations`, '_blank')
+const toggleReservations = () => {
+  showReservations.value = !showReservations.value
+  if (showReservations.value) showLoans.value = false
 }
 
 const getStatusClass = (status) => {
@@ -218,13 +255,23 @@ const getStatusClass = (status) => {
 }
 .selected-row {
   background-color: #fef3c7; /* A light yellow highlight */
+  /* ensure selected row text is black for better contrast */
+  color: #000;
 }
+/* Also ensure table cells in selected row are black */
+.selected-row td { color: #000; }
 .no-results {
   background: white;
   padding: 40px;
   text-align: center;
   color: #6b7280;
   border-radius: 8px;
+}
+
+/* Active toggle button style (black) */
+.btn-active {
+  background-color: #111;
+  color: #fff;
 }
 
 .user-detail-card {
@@ -251,4 +298,7 @@ const getStatusClass = (status) => {
 .status-suspended { color: #ef4444; font-weight: bold; }
 .status-pending { color: #f59e0b; font-weight: bold; }
 .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Embedded sections style */
+.embedded-section { margin-top: 16px; padding-top: 12px; border-top: 1px dashed #e5e7eb; }
 </style>

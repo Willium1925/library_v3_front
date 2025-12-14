@@ -21,7 +21,7 @@
           <div class="toolbar-left">
             <span class="result-count">找到 {{ pagination.totalElements }} 本書</span>
           </div>
-          <div class="toolbar-right">
+          <div class="toolbar-right" style="display:flex; align-items:center; gap:12px">
             <label class="sort-label">
               排序：
               <select v-model="sortOption" @change="handleSortChange">
@@ -495,7 +495,7 @@ onMounted(async () => {
 }
 
 .series-display-toggle {
-  display: flex;
+  display: inline-flex;
   gap: 0;
   border: 1px solid var(--light-border);
   border-radius: 4px;
