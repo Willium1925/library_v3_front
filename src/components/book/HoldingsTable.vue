@@ -32,7 +32,7 @@
           <!-- 操作 -->
           <td>
             <button
-              v-if="copy.status === 'L'"
+              v-if="copy.status === 'L' || copy.status === 'R'"
               class="action-btn btn-reserve"
               @click="handleReserve(copy.id)"
               :disabled="!isAuthenticated"
