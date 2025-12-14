@@ -201,7 +201,8 @@ const handleReserve = async (copyId) => {
 }
 
 .btn-reserve {
-  background: var(--accent);
+  /*background: var(--accent);*/
+  background: #f36e9e;
   color: #fff;
 }
 
