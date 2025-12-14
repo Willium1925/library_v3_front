@@ -13,10 +13,10 @@
           <div class="card-meta">預約日期：{{ formatDate(reservation.reservedAt) }}</div>
         </template>
         <template #status>
-          <span v-if="reservation.status === 'NOTIFIED'" class="status-pill ready">可取書</span>
+          <span v-if="reservation.status === 'AVAILABLE'" class="status-pill ready">可取書</span>
           <span v-else class="status-pill waiting">等候到館</span>
-          <div v-if="reservation.status === 'NOTIFIED'" style="font-size:13px;">
-            預計保留至<br>{{ formatDate(reservation.pickupDeadline) }}
+          <div v-if="reservation.status === 'AVAILABLE'" style="font-size:13px;">
+            預計保留至<br>{{ formatDate(reservation.expirationDate) }}
           </div>
           <div v-else style="font-size:13px;">順位：{{ reservation.queuePosition }}</div>
         </template>
