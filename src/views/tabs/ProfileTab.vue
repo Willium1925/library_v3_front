@@ -30,18 +30,27 @@
       
       <div class="profile-actions">
         <button class="btn" @click="handleEditProfile">編輯資料</button>
-        <button class="btn btn-outline-danger" @click="handleChangePassword">更改密碼</button>
+        <button class="btn btn-outline-danger" @click="showChangePasswordModal = true">更改密碼</button>
       </div>
     </div>
+
+    <ChangePasswordModal
+      v-if="showChangePasswordModal"
+      @close="showChangePasswordModal = false"
+      @success="handlePasswordChanged"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useAuthStore } from '../../stores/auth'
+import ChangePasswordModal from '../../components/ChangePasswordModal.vue'
 
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
+
+const showChangePasswordModal = ref(false)
 
 const getRoleText = (role) => {
   const roleMap = {
@@ -56,8 +65,10 @@ const handleEditProfile = () => {
   alert('編輯資料功能開發中')
 }
 
-const handleChangePassword = () => {
-  alert('修改密碼功能開發中')
+const handlePasswordChanged = () => {
+  showChangePasswordModal.value = false
+  // 密碼更改成功後，可以考慮強制使用者重新登入
+  // authStore.logout()
 }
 </script>
 
@@ -147,4 +158,3 @@ const handleChangePassword = () => {
   color: #fff;
 }
 </style>
-

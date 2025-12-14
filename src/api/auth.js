@@ -31,6 +31,23 @@ export const authAPI = {
    */
   getCurrentUser() {
     return apiClient.get('/users/me/profile')
+  },
+
+  /**
+   * 驗證舊密碼
+   * @param {string} oldPassword
+   */
+  verifyOldPassword(oldPassword) {
+    return apiClient.post('/users/me/change-password/verify-old', { oldPassword })
+  },
+
+  /**
+   * 修改密碼
+   * @param {Object} data
+   * @param {string} data.oldPassword
+   * @param {string} data.newPassword
+   */
+  changePassword(data) {
+    return apiClient.post('/users/me/change-password', data)
   }
 }
-
