@@ -2,7 +2,10 @@
   <div class="search-page">
     <TheHeader />
     
-    <div class="layout-container">
+    <div class="layout-container" :class="{ 'sidebar-open': isSidebarOpen }">
+      <!-- Overlay for mobile -->
+      <div class="sidebar-overlay" @click="closeSidebar"></div>
+
       <!-- Sidebar -->
       <FilterSidebar
         :mainCategories="formattedMainCategories"
@@ -12,10 +15,19 @@
         :tags="formattedTags"
         :initialFilters="filters"
         @filter-change="handleFilterChange"
+        @close="closeSidebar"
       />
       
       <!-- Main Content -->
       <main class="main-content">
+        <!-- Mobile Toolbar -->
+        <div class="mobile-toolbar">
+          <button class="filter-toggle-btn" @click="openSidebar">
+            <i class="fa-solid fa-sliders"></i>
+            篩選條件
+          </button>
+        </div>
+
         <!-- Toolbar -->
         <div class="toolbar">
           <div class="toolbar-left">
@@ -119,6 +131,8 @@ import BookGrid from '../components/book/BookGrid.vue'
 const route = useRoute()
 const router = useRouter()
 const booksStore = useBooksStore()
+
+const isSidebarOpen = ref(false)
 
 const loading = ref(false)
 const books = ref([])
@@ -253,6 +267,7 @@ const handleFilterChange = (newFilters) => {
   pagination.currentPage = 0  // 重置到第一頁
   updateURL()
   searchBooks()
+  closeSidebar()
 }
 
 const handleSortChange = () => {
@@ -425,6 +440,9 @@ const fetchFilterOptions = async () => {
     console.error('獲取篩選選項失敗:', error)
   }
 }
+
+const openSidebar = () => isSidebarOpen.value = true
+const closeSidebar = () => isSidebarOpen.value = false
 
 // 監聽路由變化
 watch(() => route.query, () => {
@@ -619,10 +637,71 @@ onMounted(async () => {
 }
 
 /* Responsive */
+.mobile-toolbar { display: none; }
+.sidebar-overlay { display: none; }
+
 @media (max-width: 992px) {
   .layout-container {
     grid-template-columns: 1fr;
+    padding-top: 0;
+    margin-top: 20px;
+  }
+
+  .mobile-toolbar {
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .filter-toggle-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .layout-container > :deep(.sidebar) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 300px;
+    max-width: 80%;
+    background: #fff;
+    z-index: 1001;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    overflow-y: auto;
+    box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+  }
+
+  .layout-container.sidebar-open > :deep(.sidebar) {
+    transform: translateX(0);
+  }
+
+  .sidebar-open .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .toolbar-right {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 </style>
-
