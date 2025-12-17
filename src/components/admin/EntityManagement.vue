@@ -30,7 +30,7 @@
               <input 
                 v-if="editing === item.id" 
                 v-model="item[nameField]"
-                @keyup.enter="save(item)"
+                @keydown.enter.prevent="save(item, $event)"
               />
               <span v-else>{{ item[nameField] }}</span>
             </td>
@@ -131,7 +131,10 @@ const edit = (item) => {
   editing.value = item.id
 }
 
-const save = async (item) => {
+const save = async (item, event) => {
+  if (event && event.isComposing) {
+    return;
+  }
   try {
     const data = { [props.nameField]: item[props.nameField] }
     await props.api.update(item.id, data)
@@ -279,4 +282,3 @@ onMounted(() => {
   color: #6b7280;
 }
 </style>
-

@@ -27,7 +27,7 @@
                 <input 
                   v-if="editingMain === cat.id" 
                   v-model="cat.categoryTitle"
-                  @keyup.enter="saveMainCategory(cat)"
+                  @keydown.enter.prevent="saveMainCategory(cat, $event)"
                 />
                 <span v-else>{{ cat.categoryTitle }}</span>
               </td>
@@ -96,7 +96,7 @@
                 <input 
                   v-if="editingSub === sub.id" 
                   v-model="sub.categorySubTitle"
-                  @keyup.enter="saveSubCategory(sub)"
+                  @keydown.enter.prevent="saveSubCategory(sub, $event)"
                 />
                 <span v-else>{{ sub.categorySubTitle }}</span>
               </td>
@@ -193,7 +193,10 @@ const editMainCategory = (cat) => {
   editingMain.value = cat.id
 }
 
-const saveMainCategory = async (cat) => {
+const saveMainCategory = async (cat, event) => {
+  if (event && event.isComposing) {
+    return;
+  }
   try {
     await adminCategoriesAPI.updateMain(cat.id, { categoryTitle: cat.categoryTitle })
     alert('更新成功')
@@ -239,7 +242,10 @@ const editSubCategory = (sub) => {
   editingSub.value = sub.id
 }
 
-const saveSubCategory = async (sub) => {
+const saveSubCategory = async (sub, event) => {
+  if (event && event.isComposing) {
+    return;
+  }
   try {
     await adminCategoriesAPI.updateSub(sub.id, { categorySubTitle: sub.categorySubTitle })
     alert('更新成功')
@@ -388,4 +394,3 @@ onMounted(() => {
   border-radius: 4px;
 }
 </style>
-
