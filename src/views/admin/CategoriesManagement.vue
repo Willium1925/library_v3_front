@@ -225,8 +225,8 @@ const addSubCategory = () => {
   if (!title) return
   
   adminCategoriesAPI.createSub({ 
-    categorySubTitle: title, 
-    mainCategoryId: selectedMainCategoryId.value 
+    categorySubTitle: title,
+    categoryId: selectedMainCategoryId.value
   })
     .then(() => {
       alert('新增成功')
