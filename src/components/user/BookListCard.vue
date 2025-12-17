@@ -13,7 +13,12 @@
       <slot name="meta"></slot>
     </div>
     <div class="card-status">
-      <slot name="status"></slot>
+      <div>
+        <slot name="status"></slot>
+      </div>
+      <div>
+        <slot name="actions"></slot>
+      </div>
     </div>
   </div>
 </template>
@@ -96,4 +101,3 @@ defineProps({
   border: 2px solid var(--accent);
 }
 </style>
-

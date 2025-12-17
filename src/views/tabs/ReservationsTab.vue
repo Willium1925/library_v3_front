@@ -2,28 +2,38 @@
   <div class="reservations-tab">
     <h2 class="panel-header">我的預約</h2>
     
-    <div v-if="!loading && reservations.length > 0" class="reservations-list">
+    <div v-if="!userStore.loading && userStore.reservations.length > 0" class="reservations-list">
       <BookListCard
-        v-for="reservation in reservations"
-        :key="reservation.bookId"
+        v-for="reservation in userStore.reservations"
+        :key="reservation.reservationId"
         :book="reservation"
       >
         <template #meta>
           <div class="card-meta">預約日期：{{ formatDate(reservation.reserveDate) }}</div>
-          <div v-if=reservation.notifyDate class="card-meta" style="color:var(--primary); font-weight:700;">通知日期：{{ formatDate(reservation.notifyDate) }}</div>
+          <div v-if="reservation.notifyDate" class="card-meta" style="color:var(--primary); font-weight:700;">通知取書：{{ formatDate(reservation.notifyDate) }}</div>
         </template>
         <template #status>
           <span v-if="reservation.status === 'AVAILABLE'" class="status-pill ready">可取書</span>
-          <span v-else class="status-pill waiting">等候到館</span>
-          <div v-if="reservation.status === 'AVAILABLE'" style="font-size:13px;">
-            預計保留至<br>{{ formatDate(reservation.expirationDate) }}
+          <span v-else-if="reservation.status === 'PENDING'" class="status-pill waiting">排隊等候</span>
+
+          <div v-if="reservation.status === 'AVAILABLE'" class="status-text">
+            請於 {{ formatDate(reservation.expirationDate) }} 前<br>至櫃檯取書
           </div>
-          <div v-else style="font-size:13px;">順位：{{ reservation.queuePosition }}</div>
+          <div v-else-if="reservation.status === 'PENDING'" class="status-text">目前順位：{{ reservation.queuePosition }}</div>
+        </template>
+        <template #actions>
+          <button
+            v-if="reservation.status === 'PENDING' || reservation.status === 'AVAILABLE'"
+            class="btn-cancel"
+            @click="handleCancelReservation(reservation.reservationId)"
+          >
+            <i class="fa-regular fa-trash-can"></i> 取消預約
+          </button>
         </template>
       </BookListCard>
     </div>
     
-    <div v-else-if="loading" class="loading">
+    <div v-else-if="userStore.loading" class="loading">
       <i class="fa-solid fa-spinner fa-spin"></i>
       <p>載入中...</p>
     </div>
@@ -36,24 +46,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useUserStore } from '../../stores/user'
+import { reservationsAPI } from '../../api/reservations'
 import BookListCard from '../../components/user/BookListCard.vue'
 
 const userStore = useUserStore()
 
-const loading = ref(false)
-const reservations = ref([])
-
-const fetchReservations = async () => {
+const handleCancelReservation = async (reservationId) => {
+  if (!confirm('確定要取消這筆預約嗎？')) {
+    return
+  }
   try {
-    loading.value = true
+    await reservationsAPI.cancel(reservationId)
+    alert('預約已取消')
+    // 重新獲取列表以更新畫面
     await userStore.fetchReservations()
-    reservations.value = userStore.reservations
   } catch (error) {
-    console.error('獲取預約記錄失敗:', error)
-  } finally {
-    loading.value = false
+    console.error('取消預約失敗:', error)
+    alert('取消預約失敗')
   }
 }
 
@@ -64,7 +75,7 @@ const formatDate = (dateString) => {
 }
 
 onMounted(() => {
-  fetchReservations()
+  userStore.fetchReservations()
 })
 </script>
 
@@ -107,6 +118,11 @@ onMounted(() => {
   color: var(--gray);
 }
 
+.status-text {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .loading,
 .no-data {
   display: flex;
@@ -130,6 +146,22 @@ onMounted(() => {
   margin-bottom: 4px;
 }
 
+.btn-cancel {
+  background: none;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background: var(--accent);
+  color: white;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -141,4 +173,3 @@ onMounted(() => {
   }
 }
 </style>
-
