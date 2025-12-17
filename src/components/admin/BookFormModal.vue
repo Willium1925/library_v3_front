@@ -192,7 +192,10 @@
               <td>
                 <select v-model="copy.status">
                   <option value="A">在館</option>
-                  <option value="U">已下架</option>
+                  <option value="L">已借出</option>
+                  <option value="P">處理中</option>
+                  <option value="R">被預約</option>
+                  <option value="U">下架</option>
                 </select>
               </td>
               <td>
@@ -216,6 +219,14 @@
             <span class="label">書名：</span>
             <span class="value">{{ formData.title }}</span>
           </div>
+
+          <div class="preview-item">
+            <span class="label">圖片 URL：</span>
+            <span class="value">
+              <img :src="formData.imageUrl" alt="圖片預覽" style="max-width:120px; max-height:160px; border-radius:4px; object-fit:cover;" />
+            </span>
+          </div>
+
           <div class="preview-item">
             <span class="label">ISBN：</span>
             <span class="value">{{ formData.isbn || '-' }}</span>
