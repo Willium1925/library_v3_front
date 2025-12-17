@@ -19,6 +19,9 @@
             :src="book.imageUrl || 'https://placehold.co/350x500/eee/333?text=No+Cover'"
             :alt="book.title"
           />
+          <div class="favorite-overlay">
+            <FavoriteButton :book-id="book.id" />
+          </div>
         </div>
         
         <!-- Right: Book Details -->
@@ -115,6 +118,7 @@ import { useBooksStore } from '../stores/books'
 import TheHeader from '../components/common/TheHeader.vue'
 import HoldingsTable from '../components/book/HoldingsTable.vue'
 import ReviewList from '../components/book/ReviewList.vue'
+import FavoriteButton from "../components/book/FavoriteButton.vue";
 
 const route = useRoute()
 const router = useRouter()
@@ -222,6 +226,17 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.favorite-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  opacity: 1; /* always visible */
+  transition: opacity 0.3s;
+  padding: 6px;
 }
 
 .book-details {
