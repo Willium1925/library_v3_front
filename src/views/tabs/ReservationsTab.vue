@@ -25,7 +25,7 @@
           <button
             v-if="reservation.status === 'PENDING' || reservation.status === 'AVAILABLE'"
             class="btn-cancel"
-            @click="handleCancelReservation(reservation.reservationId)"
+            @click.stop="handleCancelReservation(reservation.reservationId)"
           >
             <i class="fa-regular fa-trash-can"></i> 取消預約
           </button>

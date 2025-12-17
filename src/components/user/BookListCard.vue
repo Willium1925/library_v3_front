@@ -1,5 +1,9 @@
 <template>
-  <div class="list-card" :class="{ 'overdue-border': isOverdue }">
+  <div
+    class="list-card"
+    :class="{ 'overdue-border': isOverdue }"
+    @click="goToDetail"
+  >
     <div class="card-img">
       <img
         :src="book.imageUrl || 'https://placehold.co/100x140/eee/333?text=Book'"
@@ -24,7 +28,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { useRouter } from 'vue-router'
+
+const props = defineProps({
   book: {
     type: Object,
     required: true
@@ -34,6 +40,17 @@ defineProps({
     default: false
   }
 })
+
+const router = useRouter()
+
+const goToDetail = () => {
+// book prop 是多型的，可能是借閱、預約等資料。
+// 需要取出實際的書籍 ID，該欄位統一命名為 bookId。
+  const bookId = props.book.bookId;
+  if (bookId) {
+    router.push(`/books/${bookId}`);
+  }
+}
 </script>
 
 <style scoped>
@@ -46,11 +63,14 @@ defineProps({
   gap: 25px;
   align-items: flex-start;
   position: relative;
+  cursor: pointer; /* Add pointer cursor */
+  transition: all 0.2s;
 }
 
 .list-card:hover {
   border-color: var(--primary);
   box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.05);
+  transform: translate(-2px, -2px);
 }
 
 .card-img {
