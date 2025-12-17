@@ -10,12 +10,13 @@
           id: favorite.bookId,
           title: favorite.title,
           author: favorite.author,
-          imageUrl: favorite.imageUrl,
-          uniqueCode: '—'
+          imageUrl: favorite.imageUrl
         }"
       >
         <template #meta>
           <div class="card-meta">收藏日期：{{ formatDate(favorite.createdAt) }}</div>
+          <br>
+          <br>
         </template>
         <template #status>
           <button class="btn btn-sm btn-outline-danger" @click="handleRemove(favorite.bookId)">
@@ -143,6 +144,12 @@ onMounted(() => {
   font-size: 50px;
   margin-bottom: 15px;
   opacity: 0.5;
+}
+
+.card-meta {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 4px;
 }
 
 @keyframes fadeIn {

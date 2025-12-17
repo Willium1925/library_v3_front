@@ -13,7 +13,7 @@
     <div class="card-info">
       <div class="card-title">{{ book.title }}</div>
       <div class="card-meta">作者：{{ Array.isArray(book.authors) ? book.authors.join('、') : (book.author || book.authors || '未知') }}</div>
-      <div class="card-meta">書籍碼：{{ book.uniqueCode }}</div>
+      <div v-if="book.uniqueCode" class="card-meta">書籍碼：{{ book.uniqueCode }}</div>
       <slot name="meta"></slot>
     </div>
     <div class="card-status">
@@ -44,8 +44,8 @@ const props = defineProps({
 const router = useRouter()
 
 const goToDetail = () => {
-// book prop 是多型的，可能是借閱、預約等資料。
-// 需要取出實際的書籍 ID，該欄位統一命名為 bookId。
+  // book prop 是多型的，可能是借閱、預約等資料。
+  // 需要取出實際的書籍 ID，該欄位統一命名為 bookId。
   const bookId = props.book.bookId;
   if (bookId) {
     router.push(`/books/${bookId}`);
