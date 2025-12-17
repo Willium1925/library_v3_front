@@ -10,7 +10,7 @@
       >
         <template #meta>
           <div class="card-meta">預約日期：{{ formatDate(reservation.reserveDate) }}</div>
-          <div class="card-meta" style="color:var(--primary); font-weight:700;">通知日期：{{ formatDate(reservation.notifyDate) }}</div>
+          <div v-if=reservation.notifyDate class="card-meta" style="color:var(--primary); font-weight:700;">通知日期：{{ formatDate(reservation.notifyDate) }}</div>
         </template>
         <template #status>
           <span v-if="reservation.status === 'AVAILABLE'" class="status-pill ready">可取書</span>

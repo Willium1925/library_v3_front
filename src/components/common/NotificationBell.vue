@@ -17,7 +17,7 @@
           v-for="notification in notifications"
           :key="notification.id"
           class="notification-item"
-          :class="{ unread: !notification.isRead }"
+          :class="{ unread: !notification.read }"
           @click.stop="handleNotificationClick(notification)"
         >
           <div class="notification-content">
@@ -25,7 +25,7 @@
             <p class="notification-message">{{ notification.content }}</p>
             <span class="notification-time">{{ formatTime(notification.createdAt) }}</span>
           </div>
-          <i v-if="!notification.isRead" class="fa-solid fa-circle unread-dot"></i>
+          <i v-if="!notification.read" class="fa-solid fa-circle unread-dot"></i>
         </div>
         
         <div v-if="notifications.length === 0" class="no-notifications">
@@ -62,7 +62,7 @@ const toggleDropdown = async () => {
 }
 
 const handleNotificationClick = async (notification) => {
-  if (!notification.isRead) {
+  if (!notification.read) {
     await notificationStore.markAsRead(notification.id)
   }
   showDropdown.value = false
