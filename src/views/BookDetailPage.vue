@@ -29,7 +29,17 @@
           <div class="book-header-row">
             <div class="book-title-group">
               <h1 class="book-title">{{ book.title }}</h1>
-              <p class="book-author">作者：{{ Array.isArray(book.authors) ? book.authors.join('、') : (book.author || book.authors || '未知') }}</p>
+              <p class="book-author">
+                作者：
+                <span
+                  v-for="(author, index) in book.authors"
+                  :key="author.id"
+                  @click.stop="goToSearch('authorId', author.id)"
+                  class="clickable-meta"
+                >
+                  {{ author.name }}{{ index < book.authors.length - 1 ? '、' : '' }}
+                </span>
+              </p>
             </div>
             <div class="rating-box">
               <span :class="['rating-score', { 'large-yellow': book.averageRating !== undefined && book.averageRating !== null }]">
@@ -65,17 +75,22 @@
             </div>
             <div class="meta-item">
               <span class="meta-label">分類:</span>
-              <span class="meta-value">{{ book.mainCategoryTitle }} > {{ book.subCategoryTitle }}</span>
+              <span class="meta-value">
+                <span class="clickable-meta" @click="goToSearch('mainCategoryId', book.mainCategoryId)">{{ book.mainCategoryTitle }}</span>
+                >
+                <span class="clickable-meta" @click="goToSearch('subCategoryId', book.subCategoryId)">{{ book.subCategoryTitle }}</span>
+              </span>
             </div>
           </div>
           
           <!-- Tags -->
           <div v-if="book.tags && book.tags.length > 0" class="tags-row">
             <div v-for="tag in book.tags"
-                :key="tag.id || tag"
+                :key="tag.id"
                 class="tag"
+                @click.stop="goToSearch('tags', tag.id)"
             >
-              {{ tag.title || tag }}
+              {{ tag.title }}
             </div>
           </div>
           
@@ -150,6 +165,14 @@ const formatDate = (dateString) => {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'
+  })
+}
+
+const goToSearch = (filterType, filterValue) => {
+  if (!filterType || !filterValue) return;
+  router.push({
+    path: '/search',
+    query: { [filterType]: filterValue }
   })
 }
 
@@ -337,6 +360,18 @@ onMounted(() => {
 
 .meta-value {
   font-weight: 500;
+}
+
+.clickable-meta {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: all 0.2s;
+}
+
+.clickable-meta:hover {
+  color: var(--primary);
+  text-decoration-color: var(--primary);
 }
 
 /* Tags */
